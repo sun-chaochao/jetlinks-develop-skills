@@ -17,51 +17,58 @@
     - 计划至少包含目标、范围、不做什么、实施步骤、风险 / 待确认点和验证方式。
     - 简单低风险小任务可在给出简短计划后直接实施。
 
-3. 只切换必要 skill
+3. 后端大改先设计与测试目标，再开发
+    - 对较大的后端改动或新功能，必须遵循 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md)。
+    - 先把设计稿、任务拆分和测试目标写入当前工作区对应文档目录，再等待用户明确确认。
+    - 用户确认后，先按真实使用场景和数据制定测试目标，再实现代码，直到测试目标达成。
+    - 不允许为了让测试通过而删除测试、弱化断言、只跑无关测试、改低业务期望或绕过真实校验。
+
+4. 只切换必要 skill
     - 本文件只做路由。
     - 进入某个场景后，只加载最少数量的 focused skill。
 
-4. 优先复用现有抽象
+5. 优先复用现有抽象
     - JetLinks 系项目通常已经提供 CRUD 基类、命令服务、事件、订阅、国际化约定。
     - 默认沿用现有模式，不新增平行方案。
     - 对字符串、集合、Map 判空以及常见默认值处理，在依赖已存在或相邻实现已使用时，优先复用 Apache Commons 工具类，不手写重复判空模板。
 
-5. 以当前模块风格为准
+6. 以当前模块风格为准
     - 响应式或阻塞式、`javax` 或 `jakarta`、控制器基类、服务基类、i18n 路径，都以目标模块现状为准。
     - 仅在新建模块且没有可参考实现时，才基于通用规则做最小决策。
     - 前端任务也以当前 workspace 为准：先路由到 `$jetlinks-web`；除局部调整白名单外，同时组合 `$jetlinks-web-style` 建立页面交互方案档案。
     - 前端通用组件、hooks、utils 以当前 workspace 的 `jetlinks-web-core` 和相邻页面真实用法为准；详细前端约束不在 router 中重复维护。
 
-6. 生成最小可用实现
+7. 生成最小可用实现
     - 只实现用户明确要求的内容。
     - 不额外生成示例实体、演示接口、假设性的扩展点。
     - 保持改动范围聚焦，不把无关重构、顺手修复或跨主题整理混进当前任务。
+    - 涉及 CRUD 查询、详情、更新、删除、批量操作、导出或自定义接口时，必须分析是否需要 AssetsHolder 数据权限控制；具体实现切到 `$jetlinks-assets-permission`，不要手写租户 / 部门 / 创建人过滤替代统一资产权限；资产类型、关联字段、权限动作或例外规则拿不准时先询问用户。
 
-7. 软链接模块同样属于工作区事实
+8. 软链接模块同样属于工作区事实
     - 如果模块、组件或聚合目录是符号链接，不要忽略。
     - 需要同时识别“链接入口路径”和“真实目标路径”，必要时沿链接继续读取代码与配置。
 
-8. 低上下文脚手架也要可工作
+9. 低上下文脚手架也要可工作
     - 如果当前仓库几乎没有业务代码、只有少量模板或只是空脚手架，不要停在“缺少参考实现”。
     - 在这种情况下，允许退化到“模板仓库模式”：基于根 `pom.xml`、目录结构、已有依赖和本规则集生成最小可用骨架。
     - 退化模式不仅适用于模块创建，也适用于 CRUD、权限、命令边界、事件驱动和基础 i18n 决策。
 
-9. 任务结束时可以判断是否值得沉淀知识
+10. 任务结束时可以判断是否值得沉淀知识
     - 只有产出了稳定、可复用、非显然的知识时，才建议写总结或沉淀文档。
     - 沉淀形式优先选择 worklog、knowledge、playbook，再考虑 prompt 或 skill 更新。
     - 如果判断值得沉淀，不要直接结束任务；应先提示用户是否需要生成正式文档。
     - 如果结论已经成熟到可抽成通用 JetLinks skill，还应额外询问是否并入 `jetlinks-develop-skills` 并准备官方 PR。
 
-10. 一个任务可以同时使用多个 focused skill
+11. 一个任务可以同时使用多个 focused skill
     - 例如“新建模块并补 CRUD”通常会同时使用模块路由、通用规范和 CRUD skill。
     - 例如“改事件处理器并整理 PR”通常会同时使用事件订阅、响应式实践和 Git 交付 skill。
     - 例如“改前端列表页并补提交流程”通常会同时使用前端 skill 和交付 skill。
 
-11. 用户可见异常默认属于 i18n 范畴
+12. 用户可见异常默认属于 i18n 范畴
    - 优先沿用当前模块已有的 `i18nCode` / message key 异常模型，不在异常构造里写死 message。
    - 只有本地异常体系确实只支持 `message` 时，才在边界层回退到本地化后的文本。
 
-12. 根因优先，禁用奇技淫巧：统一以 [`jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../../jetlinks-conventions/references/root-cause-and-no-hack-rules.md) 为准；router 不重复列举禁止清单。
+13. 根因优先，禁用奇技淫巧：统一以 [`jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../../jetlinks-conventions/references/root-cause-and-no-hack-rules.md) 为准；router 不重复列举禁止清单。
 
 ## 标准工作流
 
@@ -70,6 +77,7 @@
 
 2. 判断是否进入 `plan-first`
     - 如果任务复杂、跨模块、需求仍在变化、涉及多个子任务，或存在多个方案 / 明显风险，先输出计划并等待用户确认。
+    - 如果是较大的后端改动或新功能，先读取 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md)，把设计稿和测试目标落到对应文档目录，等待用户确认后才能实现。
 
 3. 扫描当前工作区
     - 查看根目录、父 `pom.xml`、聚合模块、相邻模块、资源目录和已有实现。
@@ -93,6 +101,7 @@
 8. 交付
     - 如果任务包含提交、推送或发 PR，切换到 `$jetlinks-delivery`。
     - 后端新增功能或既有功能变动必须先补或更新对应单元测试。
+    - 较大后端改动或新功能的交付说明必须引用设计稿路径、用户确认状态和测试目标达成情况。
     - 运行改单涉及的单元测试；涉及数据库、消息、协议、跨模块边界、外部依赖、启动装配或事件链路时再跑集成测试，未触发时写明不适用原因。
     - 输出测试命令、通过数、失败数、跳过数和覆盖率数据。
 
@@ -118,6 +127,7 @@
 
 切换：
 - [`$jetlinks-boundary`](../../jetlinks-boundary/SKILL.md)
+- [`$jetlinks-assets-permission`](../../jetlinks-assets-permission/SKILL.md)
 
 适用：
 - 需要使用其他模块能力
@@ -163,6 +173,7 @@
 - Entity / Service / Controller 的常规新增或修改
 - 标准增删改查
 - 权限、校验、基础 i18n
+- AssetsHolder 数据权限可见范围、详情访问、更新删除校验、批量操作和导出边界判断
 - 空脚手架中首次创建基础 CRUD 骨架
 
 ### 复杂 CRUD / 查询 / 批处理
@@ -173,6 +184,19 @@
 适用：
 - 复杂条件查询、分页、聚合、批量修改、关系同步
 - CRUD 伴随复杂副作用
+- 关联查询或跨模块查询需要判断 AssetsHolder 权限作用在实体自身、关联资产还是服务边界
+
+### 数据权限 / 资产权限
+
+切换：
+- [`$jetlinks-assets-permission`](../../jetlinks-assets-permission/SKILL.md)
+
+适用：
+- CRUD、自定义查询、聚合、导出、详情、更新、删除、批量操作需要数据权限控制
+- 需要判断 `AssetType`、`@AssetsController`、`AssetsHolderCrudController`、`CorrelatesAssetsHolderCrudController`、`CrudAssetPermission`
+- 需要使用 `AssetsHolder.injectQueryParam`、`AssetsHolder.assertPermission`、`AssetsHolder.filterAssets`
+- 命令服务、订阅或消息推送需要按资产权限过滤
+- 拿不准资产类型、关联字段、权限动作或绑定关系
 
 ### 跨服务或跨边界调用
 
