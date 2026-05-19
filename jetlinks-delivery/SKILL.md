@@ -16,7 +16,7 @@ Read [`references/git-and-pr-rules.md`](references/git-and-pr-rules.md) first.
 5. Align the commit message with the repository's existing `type(scope): summary` style and clearly separate verified facts from recommended wording.
 6. If the change adds backend functionality or changes existing backend behavior, ensure corresponding unit tests are added or updated before PR preparation.
 7. Run the relevant unit tests and required integration tests, then collect numeric evidence.
-8. Check whether the change also requires synchronizing existing documentation such as README, module docs, API docs, AGENTS, or other owning docs; prefer updating the existing source document instead of creating a new task log.
+8. Check whether the change also requires synchronizing existing owning documentation. Treat README as durable repository/module overview only; put test reports and PR evidence in PR/CI, and prefer updating an existing source document instead of creating a new task log.
 9. Prepare the PR description with purpose, core changes, test data, coverage data, documentation sync status, and residual risks.
 
 ## Required Constraints
@@ -28,6 +28,7 @@ Read [`references/git-and-pr-rules.md`](references/git-and-pr-rules.md) first.
 - Do not say delivery is complete when code or behavior changed but required source docs are clearly stale; either update them or state the exact gap and risk.
 - Do not use vague PR text such as “tested” or “optimized” without data.
 - Do not default to creating a new per-task document or archive log; follow repo-local documentation rules and prefer updating existing docs.
+- Do not put single-task test reports, PR descriptions, temporary plans, or troubleshooting logs into README files.
 - Do not emit multi-line `git commit` commands that rely on literal `\n` becoming real newlines.
 
 ## Response Shape

@@ -19,7 +19,8 @@
 
 3. 后端大改先设计与测试目标，再开发
     - 对较大的后端改动或新功能，必须遵循 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md)。
-    - 先把设计稿、任务拆分和测试目标写入当前工作区对应文档目录，再等待用户明确确认。
+    - 文档落点遵循 [`document-placement-rules.md`](document-placement-rules.md)：README 只放长期总览，测试报告、任务流水和 PR 证据不放 README。
+    - 先把设计稿、任务拆分和测试目标写入当前工作区对应归属文档，再等待用户明确确认。
     - 用户确认后，先按真实使用场景和数据制定测试目标，再实现代码，直到测试目标达成。
     - 不允许为了让测试通过而删除测试、弱化断言、只跑无关测试、改低业务期望或绕过真实校验。
 
@@ -56,6 +57,7 @@
 10. 任务结束时可以判断是否值得沉淀知识
     - 只有产出了稳定、可复用、非显然的知识时，才建议写总结或沉淀文档。
     - 沉淀形式优先选择 worklog、knowledge、playbook，再考虑 prompt 或 skill 更新。
+    - 不为每次任务默认新增文档；先更新已有归属文档，或把一次性测试证据留在 PR / CI。
     - 如果判断值得沉淀，不要直接结束任务；应先提示用户是否需要生成正式文档。
     - 如果结论已经成熟到可抽成通用 JetLinks skill，还应额外询问是否并入 `jetlinks-develop-skills` 并准备官方 PR。
 
@@ -77,7 +79,7 @@
 
 2. 判断是否进入 `plan-first`
     - 如果任务复杂、跨模块、需求仍在变化、涉及多个子任务，或存在多个方案 / 明显风险，先输出计划并等待用户确认。
-    - 如果是较大的后端改动或新功能，先读取 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md)，把设计稿和测试目标落到对应文档目录，等待用户确认后才能实现。
+    - 如果是较大的后端改动或新功能，先读取 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md) 和 [`document-placement-rules.md`](document-placement-rules.md)，把设计稿和测试目标落到对应归属文档，等待用户确认后才能实现。
 
 3. 扫描当前工作区
     - 查看根目录、父 `pom.xml`、聚合模块、相邻模块、资源目录和已有实现。
