@@ -11,7 +11,7 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 
 1. Classify the task.
 2. Decide whether the task must enter a plan-first gate. Use it for complex, cross-module, multi-subtask, or still-changing requirements.
-3. For large backend changes or new backend features, read [`references/backend-design-test-driven-rules.md`](references/backend-design-test-driven-rules.md), write the design draft and test goals into the appropriate docs directory, then wait for explicit user confirmation before implementation.
+3. For large backend changes or new backend features, read [`references/backend-design-test-driven-rules.md`](references/backend-design-test-driven-rules.md) and [`references/document-placement-rules.md`](references/document-placement-rules.md), write the design draft and test goals into the appropriate owning docs location, then wait for explicit user confirmation before implementation.
 4. When plan-first is required but the backend design gate does not apply, output a concise plan that covers goal, scope, non-goals, steps, risks or pending confirmations, and validation, then wait for user confirmation before implementation.
 5. Switch to the most relevant focused JetLinks skill.
 6. Combine multiple focused skills when the task crosses boundaries.
@@ -44,6 +44,7 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 - When local examples are missing, clearly separate defaults from verified workspace facts.
 - Do not directly implement complex or unstable requirements before clarifying scope, exclusions, risks, and validation with the user.
 - Do not implement large backend changes or new backend features before a design draft and test goals have been written to the appropriate docs directory and explicitly confirmed by the user.
+- Do not place task logs, test reports, PR descriptions, or temporary design notes into README files; README is for durable repository or module overview.
 - Do not treat tests as a checkbox: test goals must map to realistic business scenarios and data, and failures must drive root-cause analysis rather than weaker assertions.
 - When the framework, SDK, third-party library, or existing API does not directly satisfy the requirement (inaccessible method, serialization error, reactive/blocking mismatch, type/generic clash, exception model gap, third-party behavior mismatch), route through `$jetlinks-conventions` and resolve the root cause via official extension points, adjacent module abstractions, dependency choice, or by informing the user with concrete trade-offs; never ship reflection / `Unsafe` / visibility bypass / copied source / monkey patches / bytecode injection / silent exception swallowing as a hidden workaround. See [`../jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../jetlinks-conventions/references/root-cause-and-no-hack-rules.md).
 - When Apache Commons utilities are already present or adjacent code already uses them, prefer them for common null or empty checks instead of handwritten repetitive branches.
