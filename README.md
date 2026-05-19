@@ -17,6 +17,7 @@ jetlinks-develop-skills/
 ├── jetlinks-reactive/
 ├── jetlinks-routing/
 ├── jetlinks-crud/
+├── jetlinks-assets-permission/
 ├── jetlinks-boundary/
 ├── jetlinks-events/
 ├── jetlinks-web/
@@ -54,7 +55,11 @@ jetlinks-develop-skills/
 
 ### `jetlinks-crud`
 
-用于标准 CRUD、复杂查询、批量处理和 CRUD 相关副作用。
+用于标准 CRUD、复杂查询、批量处理、CRUD 相关副作用，并在涉及数据权限时路由到 AssetsHolder 资产权限规则。
+
+### `jetlinks-assets-permission`
+
+用于 JetLinks 后端统一 AssetsHolder 数据权限控制，包括 AssetType、`@AssetsController`、`AssetsHolderCrudController`、`CorrelatesAssetsHolderCrudController`、`CrudAssetPermission`、查询注入、操作校验、关联资产、命令服务和订阅过滤。
 
 ### `jetlinks-boundary`
 
@@ -78,7 +83,7 @@ jetlinks-develop-skills/
 
 ### `jetlinks-delivery`
 
-用于提交信息、提交命令、分支策略、测试证据和 PR 描述整理。
+用于提交信息、提交命令、分支策略、后端设计与测试驱动门禁、测试证据和 PR 描述整理。
 
 ## Scenario Routing
 
@@ -90,12 +95,13 @@ jetlinks-develop-skills/
 - 只想处理响应式链路：`$jetlinks-reactive`
 - 只想找模块或新建模块：`$jetlinks-routing`
 - 只想做 CRUD 或复杂查询：`$jetlinks-crud`
+- 只想判断或实现 AssetsHolder 数据权限边界：`$jetlinks-assets-permission`
 - 只想处理跨边界调用：`$jetlinks-boundary`
 - 只想处理事件或订阅：`$jetlinks-events`
 - 只想处理前端页面改造、能力复用、前端质量约束或在现有设计体系内优化交互：`$jetlinks-web`；若涉及页面壳层、首屏组织、信息架构或风格复用，同时用 `$jetlinks-web-style`
 - 只想先选择或复用前端页面风格/页面壳层：`$jetlinks-web-style`
 - 只想判断是否值得沉淀知识：`$jetlinks-capture`
-- 只想整理提交、测试和 PR：`$jetlinks-delivery`
+- 只想整理提交、设计门禁、测试和 PR：`$jetlinks-delivery`
 
 ## Install
 
@@ -166,12 +172,13 @@ Focused skill 示例：
 - 使用 `$jetlinks-routing` 判断这个能力应该落在哪个模块。
 - 使用 `$jetlinks-protocol` 分析协议包入口、编解码链路和二进制报文。
 - 使用 `$jetlinks-crud` 为设备管理模块新增一个查询接口。
+- 使用 `$jetlinks-assets-permission` 判断一个 CRUD 或自定义查询接口是否需要 `AssetsHolder` 数据权限控制，并选择 `@AssetsController`、`AssetsHolderCrudController`、`CorrelatesAssetsHolderCrudController` 或 `AssetsHolder.injectQueryParam`。
 - 使用 `$jetlinks-reactive` 优化当前 `Mono` / `Flux` 链路并避免阻塞。
 - 使用 `$jetlinks-boundary` 判断该能力应该走直接依赖还是命令服务。
 - 使用 `$jetlinks-events` 为现有模块增加订阅逻辑。
 - 使用 `$jetlinks-web` 在前端改造中优先复用 `@jetlinks-web-core/@jetlinks-web` 组件、hooks、utils，并按目录/状态/类型约束落地；先分析真实业务目标，做到业务优先、参考为辅，不要默认套后台 CRUD；若页面壳层、首屏组织、信息架构、视觉节奏或现有风格复用会受影响，必须先结合 `$jetlinks-web-style` 选择或映射页面风格；视觉与组件语言默认沿用 Ant Design；如需交互或视觉优化，再结合 `$frontend-design`，但只能借鉴相似业务案例中真正适配的设计，且不要加入无意义的统计数字或装饰性数据块；用户可见字段展示名、列头、按钮与提示文案统一走 i18n，可用中文作默认值；线框图和设计说明只用于沟通，最终页面不要展示“交互方式”“设计原理”等开发者导向内容；若结构不确定，先问用户或先给线框图/效果图。
 - 使用 `$jetlinks-web-style` 为前端页面先选页面壳层，例如 `标准管理表格页`、`筛选工作台式台账页`、`主从详情工作区`、`概览 / 工作台页`、`分步流 / 向导页`、`时间线 / 记录分析页` 或 `树表 / 分组管理页`，再交给 `$jetlinks-web` 实现。
-- 使用 `$jetlinks-delivery` 起草中文 commit、生成 shell 提交命令、整理测试证据和 PR 描述。
+- 使用 `$jetlinks-delivery` 起草中文 commit、生成 shell 提交命令、落实后端新增功能或行为变动的测试门禁、整理测试证据和 PR 描述。
 
 ## Best Practices
 
@@ -221,7 +228,14 @@ JetLinks 项目交付代码时，默认遵循以下规范：
 
 ### Testing Requirement
 
-- 本次提交必须经过单元测试或集成测试，至少覆盖本次改动涉及的核心路径。
+- 较大的后端改动或新功能必须先形成设计稿、任务拆分和测试目标，并落到当前工作区对应文档目录。
+- 设计稿必须经过用户明确确认后才能进入开发；若实现过程中发现设计假设不成立，先更新设计稿并重新确认。
+- 测试目标必须先于实现制定，映射真实使用场景和真实数据形态，而不是为了让测试通过而补形式化用例。
+- 涉及 CRUD 查询、详情、更新、删除、批量操作、导出或自定义接口时，必须按 `$jetlinks-assets-permission` 分析是否需要 AssetsHolder 数据权限控制；资产类型、关联字段、权限动作、绑定关系或例外规则拿不准时先询问用户。
+- 本次提交必须经过相关单元测试，并按触发条件完成集成测试，至少覆盖本次改动涉及的核心路径。
+- 后端新增功能或既有功能变动必须补充或更新对应单元测试，覆盖正常路径、关键异常路径和回归场景。
+- 涉及数据库、消息、事件、协议联调、跨模块边界、外部依赖或启动装配时，PR 中必须提供集成测试结果；无法执行时只能作为阻塞或 draft 风险说明。
+- 未触发集成测试条件时，PR 中必须写明不适用原因，不能留空。
 - 如果仓库已配置覆盖率阈值，提交前必须满足阈值。
 - 如果仓库没有统一阈值，也必须在 PR 中给出可验证的覆盖证据，而不是只写“已测试”。
 - 不能提供测试结果、覆盖率结果或失败原因的提交，不应进入待合并状态。
@@ -229,6 +243,8 @@ JetLinks 项目交付代码时，默认遵循以下规范：
 PR 中至少应提供这些数据：
 
 - 执行过的测试命令
+- 较大后端改动或新功能的设计稿路径、用户确认状态和测试目标达成情况
+- 新增或更新的测试类和核心覆盖点
 - 测试类型：单元测试、集成测试、端到端测试中的哪些
 - 通过数量、失败数量、跳过数量
 - 覆盖率数据，例如 line、branch、changed files 或 changed classes 的覆盖结果
@@ -240,7 +256,9 @@ PR 描述必须聚焦事实和结果，至少包含：
 
 - 目的：为什么要做这次改动
 - 核心变动：改了哪些模块、行为和边界
-- 测试结果：命令、通过数、失败数、跳过数、覆盖率数据
+- 设计与测试目标：较大后端改动或新功能需列出设计稿路径、确认状态、测试目标达成情况和 CRUD / AssetsHolder 数据权限分析结论
+- 测试结果：命令、新增或更新的测试类、通过数、失败数、跳过数、覆盖率数据、集成测试结果或不适用原因
+- 文档同步情况：已同步哪些原始文档，或说明无需同步的原因
 - 风险与影响面：哪些场景受影响，哪些场景未覆盖
 
 推荐模板：
@@ -256,12 +274,25 @@ PR 描述必须聚焦事实和结果，至少包含：
 - 模块 A：做了什么调整
 - 模块 B：新增了什么约束或行为
 
+## 设计与测试目标
+
+- 设计稿：`docs/plans/yyyy-mm-dd-xxx.md`
+- 用户确认：已确认 / 未确认，当前为 draft
+- 测试目标：真实场景、真实数据、正常路径、异常路径、回归路径和边界路径均已覆盖 / 列出未覆盖原因
+- 数据权限：适用 / 不适用；适用时说明 `AssetType`、`CrudAssetPermission`、查询注入、操作校验和关联资产边界
+
 ## 测试结果
 
 - 命令：`mvn -pl xxx -am test`
+- 新增/更新测试：`XxxServiceTest` 覆盖新增规则、异常分支和回归场景
 - 单元测试：42 passed, 0 failed, 1 skipped
-- 集成测试：8 passed, 0 failed
+- 集成测试：8 passed, 0 failed / 不适用：未涉及数据库、消息、事件、协议、跨模块边界、外部依赖或启动装配
 - 覆盖率：line 81.4%, branch 73.2%
+
+## 文档同步情况
+
+- 已同步：`README.md`
+- 未同步：无 / 说明原因
 
 ## 风险与说明
 
@@ -277,7 +308,7 @@ PR 描述必须聚焦事实和结果，至少包含：
 - 创建 PR 前先确认任务是否已完成：未完成使用 draft PR，已完成且用户确认后再 ready for review
 - 默认不要在一个 PR 中提交大量代码，优先按清晰主题拆分
 - 如果仓库远端是 GitHub，默认优先使用 `gh pr create` 创建 PR
-- 在带沙箱的 agent 环境中，`gh` 命令应申请非沙箱执行
+- 如果当前工具支持非沙箱审批或提权机制，`gh` 命令应申请非沙箱执行；不支持时说明限制并降级处理
 - 没有 PR 的直推提交流程，视为不符合规范
 - 仓库默认模板见 `.github/pull_request_template.md`
 
