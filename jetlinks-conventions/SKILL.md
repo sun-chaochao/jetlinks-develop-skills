@@ -32,6 +32,7 @@ Read [`references/code-conventions.md`](references/code-conventions.md) first.
 - When the framework, SDK, third-party library, or existing API does not directly satisfy the requirement, solve the root cause via official extension points, adjacent module abstractions, dependency adjustments, or by informing the user with concrete trade-offs; do not use reflection / `Unsafe` / visibility bypass / copied source / monkey patches / bytecode injection / hidden access-level changes as a silent workaround. If such an option is the only path, explain the limitation and obtain user confirmation before applying it. See [`references/root-cause-and-no-hack-rules.md`](references/root-cause-and-no-hack-rules.md).
 - Do not silence build / lint / type-check errors with broad `@SuppressWarnings`, commented-out code, ignored tests, swallowed exceptions (`catch (Exception e) {}`), or `e.printStackTrace()` instead of structured handling; fix the underlying issue or escalate to the user.
 - Do not block in reactive modules to "make it work" or invent parallel `ObjectMapper` / serializer instances to dodge serialization errors; resolve via `Module` / `Mixin` / `JsonSerializer` / `JsonDeserializer` / `@JsonTypeInfo` and reuse the module's standard configuration.
+- Do not keep compatibility code for an earlier implementation that only exists inside the same unreleased PR. Prefer the final best-practice shape and update in-PR callers, tests, fixtures, docs, and examples together; only preserve old behavior when it is released, persisted, externally depended on, or explicitly requested by the user.
 
 ## Response Shape
 
@@ -39,4 +40,5 @@ Read [`references/code-conventions.md`](references/code-conventions.md) first.
 2. Adjacent files or patterns checked
 3. I18n decision or unresolved import/i18n risks
 4. If a tool/API capability gap was hit, the root cause analysis, the chosen resolution path (official extension point / adjacent abstraction / dependency change / informing the user), and any usage of reflection / visibility bypass / copied source that was explicitly confirmed by the user
-5. Verification evidence or exact pending commands
+5. Release-boundary decision when compatibility code is considered
+6. Verification evidence or exact pending commands

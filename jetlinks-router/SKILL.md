@@ -47,6 +47,8 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 - Do not place task logs, test reports, PR descriptions, or temporary design notes into README files; README is for durable repository or module overview.
 - Do not treat tests as a checkbox: test goals must map to realistic business scenarios and data, and failures must drive root-cause analysis rather than weaker assertions.
 - Treat compatibility as a general release-boundary decision, not a CRUD-only concern. For any API, DTO, Command, Event, Topic, protocol payload, config, persisted data, frontend route parameter, QueryParam, or `termType`, collapse unreleased same-PR intermediate forms into the final best-practice design; only keep compatibility or migration for released, persisted, or externally depended-on behavior.
+- Before adding compatibility code, identify the concrete compatibility target. If the only target is an earlier commit, draft, test expectation, or caller inside the same unreleased PR, do not add fallback branches, deprecated aliases, dual DTO parsing, transitional flags, migration code, or old-behavior tests; update all in-PR callers, tests, and docs to the final canonical behavior instead.
+- If release or external dependency status is unknown, ask the user one direct question about whether the old behavior has been released, persisted, or externally depended on; do not invent compatibility "just in case".
 - When the framework, SDK, third-party library, or existing API does not directly satisfy the requirement (inaccessible method, serialization error, reactive/blocking mismatch, type/generic clash, exception model gap, third-party behavior mismatch), route through `$jetlinks-conventions` and resolve the root cause via official extension points, adjacent module abstractions, dependency choice, or by informing the user with concrete trade-offs; never ship reflection / `Unsafe` / visibility bypass / copied source / monkey patches / bytecode injection / silent exception swallowing as a hidden workaround. See [`../jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../jetlinks-conventions/references/root-cause-and-no-hack-rules.md).
 - When Apache Commons utilities are already present or adjacent code already uses them, prefer them for common null or empty checks instead of handwritten repetitive branches.
 - Keep changes scoped to the requested capability; avoid unrelated refactors or speculative cleanup.
@@ -63,7 +65,8 @@ When analyzing first:
 4. Focused JetLinks skill or skills to use
 5. Workspace facts to confirm
 6. Proposed code and document locations
-7. Plan summary, test goals, or direct-execution rationale
+7. Release-boundary decision when compatibility is in question
+8. Plan summary, test goals, or direct-execution rationale
 
 When implementing:
 
