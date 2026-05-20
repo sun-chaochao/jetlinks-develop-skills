@@ -14,6 +14,7 @@
 1. 先复用当前模块已有查询方式
    - 有 `createQuery` 就优先用它。
    - 有 QueryHelper 或专用查询抽象，就跟随它。
+   - `createQuery()` / `QueryParamEntity` 的排序、嵌套、分页和权限注入细节见 [`query-dsl-rules.md`](query-dsl-rules.md)。
 
 2. 复杂副作用尽量拆到事件层
    - CRUD 主流程负责数据本身。
@@ -68,6 +69,7 @@
 
 ## 何时联动到其他规则
 
+- `createQuery()`、`QueryParamEntity`、排序、嵌套条件、分页、AssetsHolder 查询注入：继续读取 `query-dsl-rules.md`
 - 自定义 `termType`、动态条件、关联表 exists 查询：继续读取 `dynamic-term-rules.md`
 - 跨模块能力调用：继续读取 `cross-service-call-rules.md`
 - 生命周期副作用：继续读取 `event-driven-rules.md`
