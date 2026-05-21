@@ -34,7 +34,7 @@
 
 3. 查询能力优先复用已有 `_query` 或 QueryParam 体系
    - 不为每个字段单独造接口。
-   - 涉及 `createQuery()`、排序、嵌套条件、分页或 QueryParam 改写时，读取 `query-dsl-rules.md`。
+   - 涉及 `createQuery()`、`createUpdate()`、`createDelete()`、排序、嵌套条件、分页、QueryParam 改写、复杂 SQL 或多查询组合时，读取 `query-dsl-rules.md`。
 
 4. 空模板仓库允许生成首个 CRUD 参考实现
    - 如果目标仓库没有可参考的 Entity / Service / Controller，不要停在“缺少样例”。
@@ -145,16 +145,19 @@
 - 动态复杂查询
 - 关联查询
 - 批量处理
+- 复杂 SQL、原生 SQL 或 QueryHelper
 - 性能敏感分页
 - CRUD 后强副作用联动
 
 遇到以下情况时，继续读取 `query-dsl-rules.md`：
 
 - `createQuery()` / `QueryParamEntity` DSL 查询
+- `createUpdate()` / `createDelete()` 批量更新或删除
 - 默认排序、多字段排序、分页稳定排序
 - `nest` / `orNest` / `toNestQuery` 嵌套条件
 - `setParam` 合并前端筛选与服务端固定条件
 - AssetsHolder 查询注入前后的 DSL 组织
+- `QueryHelper.transformPageResult` / `combineOneToMany` 多查询结果组合
 
 ## 自检清单
 

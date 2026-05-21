@@ -22,6 +22,13 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 - Do not wrap blocking code in reactive types and claim the flow is non-blocking.
 - Do not use `CompletableFuture.get(...)`, `Thread.sleep`, or busy-wait loops to coordinate with a reactive result; use `flatMap` / `zip` / `then` / `concatMap` / `Sinks` / events / commands instead.
 - Do not bypass reactive context with global mutable `static` state or `ThreadLocal` to fake non-blocking propagation.
+- Treat `Publisher` / `Subscriber` / `Subscription` demand, cancellation, and terminal signals as the official reactive boundary. A chain starts at an existing `Publisher` or the first real async I/O boundary, not at a local object.
+- Operators must compose clearly named functions. Do not write procedural scripts inside a chain; each `map` / `filter` / `flatMap` / `zip` / `then` should express one semantic step.
+- Keep operator chains minimal: avoid `Mono.just(...).map(...)`, adjacent `.map(...).map(...)` for one synchronous business step, `.flatMap(Mono::just)`, identity `map`, redundant `then(Mono.just(...))`, or adjacent `.filter().filter(...)` when the value can be computed before wrapping, synchronous steps can be composed into a named function, `thenReturn(...)` is clearer, or predicates can be combined / extracted.
+- Do not start a chain with `Mono.just(request)` only to transform a local value before the first async boundary; compute the argument directly and call the reactive API, such as `repository.save(request.toEntity())`.
+- Do not wrap pure synchronous helpers as `Mono` / `Flux`. Data conversion, field calculation, predicate checks, and other non-I/O logic should remain plain methods and be called from `map`, `filter`, or before entering the chain.
+- Do not call `collectList()` on unbounded or potentially large streams; only collect when the source is clearly bounded by page, limit, batch, protocol size, or validated input size. Prefer pagination, bounded `buffer` / `window`, streaming, or existing query-composition helpers.
+- Keep lambdas as glue code. If a lambda contains validation plus query plus mutation plus side effect, nested branching, loops, `try/catch`, or multiple DB / remote calls, extract a named method and test that method through the reactive chain.
 - When the reactive API or library does not satisfy the requirement (signature mismatch, missing extension point, serialization error inside the chain), follow [`../jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../jetlinks-conventions/references/root-cause-and-no-hack-rules.md): solve at the root via official extension points / adjacent abstractions / dependency choice, or inform the user with concrete trade-offs; do not use reflection / visibility hacks / copied source / silent `catch` to make the chain compile.
 - Do not implement a large reactive change before the design draft, backpressure or batching expectations, failure behavior, and realistic test goals have been documented and confirmed.
 - Do not make reactive tests pass by sleeping, swallowing errors, ignoring dropped signals, or weakening assertions; verify emitted values, completion or error signals, ordering, concurrency, retry, timeout, and side effects that match real usage.
@@ -31,6 +38,6 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 
 1. Current module execution model
 2. Reactive risks or blocking risks
-3. Recommended chain or batching pattern
+3. Official reactive boundary, recommended chain, operator semantics, and batching / collection boundary
 4. Design doc path and test goals when the backend design gate applies
 5. Verification evidence or exact pending commands
