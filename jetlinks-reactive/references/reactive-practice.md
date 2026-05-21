@@ -82,6 +82,13 @@
 - 出现校验、查询、状态变更、副作用混在一起，或有嵌套分支、循环、`try/catch`、多次 DB / 远程调用时，抽成按业务意图命名的方法
 - 抽出的私有方法按真实边界选择返回值：纯转换返回普通对象，包含 DB / 远程 / 异步副作用时才返回 `Mono` / `Flux`
 
+### 控制链路长度
+
+- Reactor 链不可避免，但长链必须按业务阶段拆小方法，让主链像流程目录。
+- 当链路同时包含校验、权限、命令发送、持久化、日志、事件或结果转换时，优先抽成 `validateAndXxx(...)`、`saveXxxAndReturn(...)`、`publishXxxEvent(...)` 等命名步骤。
+- 不把嵌套 `flatMap` 当缩进版过程式代码；嵌套里超过一个业务动作时，先抽方法。
+- 拆出的响应式方法仍返回 `Mono` / `Flux`，让超时、重试、错误传播和测试仍能组合。
+
 ### 函数式组合示例
 
 已有普通对象时，直接调用第一个响应式边界：
@@ -146,6 +153,31 @@ return repository.createQuery()
     .transform(visibleDeviceViews());
 ```
 
+长 Reactor 链按业务阶段拆分：
+
+```java
+// Bad
+return deviceService.findById(deviceId)
+    .flatMap(device -> validate(device)
+        .then(sendCommand(device, command)))
+    .flatMap(result -> saveLog(result).thenReturn(result));
+
+// Good
+return deviceService.findById(deviceId)
+    .flatMap(device -> validateAndSendCommand(device, command))
+    .flatMap(this::saveLogAndReturn);
+
+private Mono<CommandResult> validateAndSendCommand(Device device, Command command) {
+    return validate(device)
+        .then(sendCommand(device, command));
+}
+
+private Mono<CommandResult> saveLogAndReturn(CommandResult result) {
+    return saveLog(result)
+        .thenReturn(result);
+}
+```
+
 ### 错误传播
 
 - 对用户可见异常，优先在 `Mono.error(...)` / `Flux.error(...)` 中传递带 `i18nCode` 的异常实例。
@@ -182,6 +214,7 @@ return repository.createQuery()
 - 当前模块到底是响应式还是阻塞式
 - 是否出现了 `block()`、嵌套 `subscribe()`、逐条低效调用
 - 是否存在无意义算子、重复过滤、过大的 lambda
+- 是否存在难以一眼看懂的长链；是否已按业务阶段拆成命名方法
 - 是否对 `collectList()` 给出了明确的数据边界
 - 是否把复杂副作用合理拆到了事件层
 - 是否保持了链路返回类型与相邻代码一致

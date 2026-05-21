@@ -24,6 +24,7 @@ Read [`references/common-crud-rules.md`](references/common-crud-rules.md) first.
 - Do not add custom endpoints when the existing query abstraction already covers the use case.
 - Do not hand-roll SQL or private filter DTOs when `createQuery()` / `QueryParamEntity` can express the condition, sorting, pagination, or nested logic.
 - Do not concatenate dynamic SQL or manually assemble paged / parent-child query results when `QueryHelper`, `transformPageResult`, or `combineOneToMany` fits the task.
+- Do not compress complex CRUD DSL into one unreadable chain. When query construction, permission injection, sorting, pagination, result composition, and side effects mix together, split them into named parameters, query builders, or helper methods.
 - Do not write database-dialect-specific SQL unless the user explicitly limits the target database or the module already has that constraint; prefer standard SQL and record dialect risk in docs and PR when unavoidable.
 - Do not treat SQL as complete just because it returns correct rows on tiny samples; complex SQL, native SQL, deep pagination, aggregation, joins, or batch writes need pressure testing or documented performance evidence.
 - Do not perform row-by-row save / delete when `createUpdate()` / `createDelete()` can express the batch operation; use `setNull(...)` for real null assignment.
@@ -43,6 +44,7 @@ Read [`references/common-crud-rules.md`](references/common-crud-rules.md) first.
 4. Whether advanced CRUD rules are needed
 5. Whether Query DSL rules are needed
 6. Whether QueryHelper or batch update/delete DSL is needed
-7. Database portability and performance evidence when SQL is involved
-8. Verification evidence or exact pending commands
-9. Remaining CRUD risks
+7. CRUD DSL readability decision when chains become complex
+8. Database portability and performance evidence when SQL is involved
+9. Verification evidence or exact pending commands
+10. Remaining CRUD risks
