@@ -26,12 +26,19 @@
 4. 复杂 SQL 先走 QueryHelper
    - 跨表、聚合、动态列、分页转换、原生 SQL 分析或执行，优先找 `QueryHelper` / `DefaultQueryHelper` / 当前模块封装。
    - 不拼接动态 SQL 字符串来覆盖条件组合，避免 SQL 数量随筛选项膨胀。
+   - SQL 默认按标准 SQL 和多数据库兼容设计；除非用户明确限定数据库或模块已有明确限定，不写特定数据库方言。
    - 只有当前模块已有成熟模式或 DSL / QueryHelper 明显无法表达时，才使用原生 SQL。
+   - 确需数据库方言时，在设计文档和 PR 中标明数据库范围、不可移植风险、替代方案和回退方式。
 
 5. 多查询组合先走 QueryHelper
    - 分页转 DTO 优先 `QueryHelper.transformPageResult(...)`。
    - 一对多父子装配优先 `QueryHelper.combineOneToMany(...)`。
    - 普通 QueryParam 分页优先 `QueryHelper.queryPager(queryParam, repository::createQuery)` 或当前模块等价封装。
+
+6. SQL 性能按真实场景验证
+   - 写 SQL 时先估算真实数据量、筛选组合、排序字段、分页深度、索引命中和并发访问。
+   - 复杂 SQL、原生 SQL、聚合、多表关联、深分页或批量写入需要压力测试或等价性能验证。
+   - 不能压测时必须说明缺失环境、替代验证和剩余风险，不要只说“满足需求”。
 
 ## 推荐模式
 
@@ -103,6 +110,8 @@
 
 - 查询方式是否沿用了当前模块现有抽象
 - 复杂 SQL / 原生 SQL 是否优先评估了 QueryHelper，而不是拼接动态 SQL
+- SQL 是否避免了无明确依据的数据库方言，并尽量兼容标准 SQL
+- 复杂 SQL 是否按真实业务规模做了压力测试或等价性能验证
 - 分页转换和一对多组合是否优先用了 QueryHelper
 - 是否把副作用从 CRUD 主流程中合理拆出
 - 是否避免了逐条阻塞调用

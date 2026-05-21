@@ -22,6 +22,7 @@
 
 5. 复杂 SQL、原生 SQL 或多查询组合
    - 优先 `QueryHelper` / `DefaultQueryHelper`，不要按条件拼接多套 SQL 字符串。
+   - SQL 语法尽量使用标准 SQL，避免绑定特定数据库方言。
    - 分页转换优先 `QueryHelper.transformPageResult(...)`。
    - 一对多装配优先 `QueryHelper.combineOneToMany(...)`。
 
@@ -191,7 +192,11 @@ return QueryHelper.transformPageResult(
 - 复杂 SQL、原生 SQL、跨表查询、动态列、聚合或查询分析优先找当前模块的 `QueryHelper` / `DefaultQueryHelper` 模式。
 - `QueryHelper` 能承接 `QueryParamEntity`、排序、分页和映射时，不要手写字符串拼接的动态 SQL。
 - 原生 SQL 只能在 DSL / QueryHelper 明显无法表达且目标模块已有成熟模式时使用；参数必须结构化传入，禁止按条件拼接多套 SQL 变体。
+- 原生 SQL 默认使用标准 SQL 和通用函数；不要写 `limit` 方言、专有 JSON / array / window 语法、特定锁语句或专用 hint，除非用户明确要求限定某个数据库，或目标模块已有明确数据库限定。
+- 确需使用特定数据库方言时，必须在设计文档和 PR 中说明数据库范围、不可移植风险、回退或替代方案。
 - 需要分析原生 SQL 结构时，优先走 `DefaultQueryHelper(operator).analysis(sql)` 或目标模块已有封装。
+- 写 SQL 时必须按真实业务数据量、筛选组合、分页深度、排序字段、索引命中和并发访问评估性能，不只满足当前功能输出。
+- 复杂 SQL、原生 SQL、聚合、深分页或多表关联需要有压力测试或等价性能验证；无法执行时在 PR 中说明阻塞原因、替代验证和剩余风险。
 
 ### 多查询结果组合
 
@@ -219,6 +224,8 @@ return QueryHelper.combineOneToMany(
 - 批量更新或删除没有明确 `where` 条件。
 - 为清空字段写特殊占位值，而不是 `setNull(...)`。
 - 拼接动态 SQL 字符串，导致筛选组合一多就膨胀出大量 SQL 分支。
+- 未经用户明确要求就写特定数据库方言 SQL，导致多数据库部署不可用。
+- SQL 只按小样本跑通，没有按真实数据规模、分页深度、并发和索引情况做性能验证。
 - 自己复制分页元信息或手写父子集合装配，而不是用 `QueryHelper.transformPageResult` / `combineOneToMany`。
 - 为了省事手写租户、部门、创建人过滤，而不走 AssetsHolder。
 - 只 mock `fetch()` 返回值，不验证 DSL 是否包含关键条件、排序和权限注入。
@@ -232,3 +239,4 @@ return QueryHelper.combineOneToMany(
 - 断言分页：有稳定顺序，边界页不重复、不漏数据。
 - 断言更新：`set` / `setNull` 字段、`where` 范围、批量边界和未命中行为。
 - 断言组合：分页元信息保持不变，一对多装配不丢父项、不重复子项、不产生 N+1 查询。
+- 断言 SQL 兼容与性能：标准 SQL 可移植性、索引命中、真实数据量、深分页、并发压力或替代性能证据。
