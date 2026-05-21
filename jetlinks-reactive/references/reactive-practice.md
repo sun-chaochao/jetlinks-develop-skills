@@ -31,6 +31,24 @@
    - 发布消息、远程调用、缓存同步、广播通知等，优先放在事件层或提交后阶段。
    - 不把所有副作用硬塞进 CRUD 主链路。
 
+## 官方定义与工程边界
+
+参考官方定义：
+
+- Reactive Streams 定义的是异步流处理与非阻塞背压协议，核心角色是 `Publisher`、`Subscriber`、`Subscription`、`Processor`。
+- `Publisher` 只能在订阅后按 `Subscription.request(n)` 需求发送数据；`onError` / `onComplete` 是终止信号；`cancel` 表示下游不再需要数据。
+- Reactor 的 `Mono` / `Flux` 是 `Publisher` 实现；操作符本质上是把一个 `Publisher` 组合成另一个 `Publisher` 的函数描述，实际执行发生在订阅后。
+- `publishOn` / `subscribeOn` 是显式线程调度边界；`boundedElastic` 只用于无法避免的遗留阻塞调用隔离，不作为普通异步化手段。
+
+官方来源：[Reactive Streams JVM](https://github.com/reactive-streams/reactive-streams-jvm)、[Reactor Reference Guide](https://docs.spring.io/projectreactor/reactor-core/docs/current/reference/html/)。
+
+落到 JetLinks 代码里：
+
+- 响应式链路从已有 `Publisher` 或第一个真实异步边界开始：响应式仓储、远程命令、事件发布、消息订阅、异步缓存等。
+- 当前调用栈上的普通对象不是响应式边界。请求对象校验、DTO 转换、字段计算、条件判断先用普通函数完成。
+- 每个操作符都要能说清语义：转换、筛选、异步调用、顺序组合、并发组合、错误恢复、忽略前值后的下一步、资源或背压控制。
+- 如果一个 lambda 像过程式脚本，说明函数边界还没有拆出来；先按业务意图抽成命名函数，再由操作符组合。
+
 ## 常见设计准则
 
 ### 选择映射算子
@@ -38,6 +56,95 @@
 - 需要保持顺序时，优先 `concatMap`
 - 允许并发且当前模块已有此惯例时，使用 `flatMap`
 - 只做同步映射时，使用 `map`
+- `flatMap` 只用于返回 `Mono` / `Flux` 的异步步骤，不为了“看起来响应式”包一层
+- 对象转换、字段计算、条件判断等没有异步边界的函数保持普通返回值，不额外封装成 `Mono` / `Flux`
+
+### 保持算子简洁
+
+- 不写无意义链路：`Mono.just(x).map(f)` 优先改为先计算再 `Mono.just(result)`；需要懒执行或异常进入链路时才用 `Mono.fromSupplier` / `Mono.defer`
+- 当前栈上已有普通对象时，不用 `Mono.just(request).map(...).flatMap(...)` 开链；先用普通函数构造参数，再直接调用第一个响应式边界，例如 `repository.save(request.toEntity())`
+- 不写 `.flatMap(Mono::just)`、`map(v -> v)`、`then(Mono.just(x))` 这类可读性更差的中转；优先 `map`、直接返回、或 `thenReturn(x)`
+- 相邻 `.map(...).map(...)` 如果属于同一个同步业务步骤，合成一个按业务意图命名的普通函数；不要把校验、状态整理、字段赋值拆成一串小 `map`
+- 相邻 `.filter().filter(...)` 能合并就合并；条件复杂时抽成命名谓词，避免链路被细碎条件淹没
+- 必须参与成败的业务副作用不要放在 `doOnNext` / `doOnSuccess` 里，使用 `flatMap` / `then` 接入主链路
+- 纯同步转换方法可在链路里用 `map(this::toView)` / `filter(this::isVisible)`，不要改成 `Mono<View> toView(...)`
+
+### 控制集合边界
+
+- `collectList()` 只用于明确有界的数据：分页结果、固定批次、协议天然小集合、已校验大小的入参
+- 订阅流、消息流、全表查询、设备属性历史、用户可控查询等可能很大的数据，不直接 `collectList()`
+- 需要聚合时优先分页、`take` / limit、定长 `buffer` / `window`、批量仓储接口、`QueryHelper.transformPageResult`、`QueryHelper.combineOneToMany` 等既有组合方式
+- 判断不清数据规模时，先把数据边界写进设计稿或询问用户，不用“先收集再处理”兜底
+
+### 控制 lambda 复杂度
+
+- lambda 只承载局部转换、参数拼装或链路衔接
+- 出现校验、查询、状态变更、副作用混在一起，或有嵌套分支、循环、`try/catch`、多次 DB / 远程调用时，抽成按业务意图命名的方法
+- 抽出的私有方法按真实边界选择返回值：纯转换返回普通对象，包含 DB / 远程 / 异步副作用时才返回 `Mono` / `Flux`
+
+### 函数式组合示例
+
+已有普通对象时，直接调用第一个响应式边界：
+
+```java
+// Bad
+return Mono.just(request)
+    .map(CreateRequest::toEntity)
+    .flatMap(repository::save);
+
+// Good
+return repository.save(request.toEntity());
+```
+
+链路中的纯转换用命名函数：
+
+```java
+// Bad
+return repository.findById(id)
+    .flatMap(entity -> Mono.just(toView(entity)));
+
+// Good
+return repository.findById(id)
+    .map(this::toView);
+```
+
+异步边界用 `flatMap`，纯业务规则保持普通函数：
+
+```java
+return repository.findById(id)
+    .switchIfEmpty(notFound(id))
+    .map(entity -> prepareUpdate(entity, request))
+    .flatMap(repository::save)
+    .delayUntil(this::publishUpdatedEvent);
+
+private DeviceEntity prepareUpdate(DeviceEntity entity, UpdateRequest request) {
+    return applyUpdate(requireEnabled(entity), request);
+}
+```
+
+多来源组合用组合算子表达依赖关系：
+
+```java
+return deviceService.findById(id)
+    .switchIfEmpty(notFound(id))
+    .flatMap(device -> permission.assertRead(device).thenReturn(device))
+    .zipWhen(device -> productService.findById(device.getProductId()))
+    .map(tuple -> toDetail(tuple.getT1(), tuple.getT2()));
+```
+
+可复用的链路片段用函数表达，不复制过程式 lambda：
+
+```java
+private Function<Flux<DeviceEntity>, Flux<DeviceView>> visibleDeviceViews() {
+    return flux -> flux
+        .filter(this::isVisible)
+        .map(this::toView);
+}
+
+return repository.createQuery()
+    .fetch()
+    .transform(visibleDeviceViews());
+```
 
 ### 错误传播
 
@@ -64,10 +171,18 @@
 - 不在响应式 consumer 里为了省事 `block`
 - 参数组装尽量靠近边界，不把远程契约扩散到业务内部
 
+## 测试目标
+
+- 用 `StepVerifier` 或项目既有测试方式验证值、完成 / 错误信号、顺序、并发、超时、重试和副作用
+- 高频或批量路径验证没有 N+1 查询、无界 `collectList()`、无限并发 `flatMap` 或靠 `sleep` 等待的测试
+- 对真实使用场景准备数据量：分页查询按页面规模，批处理按批次规模，订阅 / 消息流按持续输入验证背压或批量策略
+
 ## 自检清单
 
 - 当前模块到底是响应式还是阻塞式
 - 是否出现了 `block()`、嵌套 `subscribe()`、逐条低效调用
+- 是否存在无意义算子、重复过滤、过大的 lambda
+- 是否对 `collectList()` 给出了明确的数据边界
 - 是否把复杂副作用合理拆到了事件层
 - 是否保持了链路返回类型与相邻代码一致
 - 是否对高频或批量场景做了批处理而不是逐条处理
