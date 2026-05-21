@@ -47,6 +47,7 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 - Do not place task logs, test reports, PR descriptions, or temporary design notes into README files; README is for durable repository or module overview.
 - Do not treat tests as a checkbox: test goals must map to realistic business scenarios and data, and failures must drive root-cause analysis rather than weaker assertions.
 - For complex SQL, native SQL, aggregation, joins, deep pagination, or batch writes, prefer standard SQL and existing QueryHelper / DSL abstractions. Only accept database-specific dialect SQL when the user explicitly requires that database or the module is already database-specific; document dialect risk and require pressure testing or equivalent performance evidence.
+- For critical backend business flows, state the TraceHolder tracing decision in the design or implementation summary: manual spans added, existing platform tracing coverage, or not applicable. Route detailed rules to [`../jetlinks-conventions/references/tracing.md`](../jetlinks-conventions/references/tracing.md).
 - Treat compatibility as a general release-boundary decision, not a CRUD-only concern. For any API, DTO, Command, Event, Topic, protocol payload, config, persisted data, frontend route parameter, QueryParam, or `termType`, collapse unreleased same-PR intermediate forms into the final best-practice design; only keep compatibility or migration for released, persisted, or externally depended-on behavior.
 - Before adding compatibility code, identify the concrete compatibility target. If the only target is an earlier commit, draft, test expectation, or caller inside the same unreleased PR, do not add fallback branches, deprecated aliases, dual DTO parsing, transitional flags, migration code, or old-behavior tests; update all in-PR callers, tests, and docs to the final canonical behavior instead.
 - If release or external dependency status is unknown, ask the user one direct question about whether the old behavior has been released, persisted, or externally depended on; do not invent compatibility "just in case".
@@ -68,7 +69,8 @@ When analyzing first:
 6. Proposed code and document locations
 7. Release-boundary decision when compatibility is in question
 8. Database portability and performance test decision when SQL is involved
-9. Plan summary, test goals, or direct-execution rationale
+9. TraceHolder tracing decision when critical backend flows are involved
+10. Plan summary, test goals, or direct-execution rationale
 
 When implementing:
 

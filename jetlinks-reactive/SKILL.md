@@ -27,6 +27,7 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 - Keep operator chains minimal: avoid `Mono.just(...).map(...)`, adjacent `.map(...).map(...)` for one synchronous business step, `.flatMap(Mono::just)`, identity `map`, redundant `then(Mono.just(...))`, or adjacent `.filter().filter(...)` when the value can be computed before wrapping, synchronous steps can be composed into a named function, `thenReturn(...)` is clearer, or predicates can be combined / extracted.
 - Split long Reactor chains by business stage. If a chain mixes validation, permission, command execution, persistence, event publication, and result conversion, keep the chain but move stages into named methods such as `validateAndSendCommand(...)` or `saveLogAndReturn(...)`.
 - Do not start a chain with `Mono.just(request)` only to transform a local value before the first async boundary; compute the argument directly and call the reactive API, such as `repository.save(request.toEntity())`.
+- For critical reactive business stages, use `MonoTracer` / `FluxTracer` or the existing domain tracer to create manual spans and attributes; route detailed TraceHolder rules to [`../jetlinks-conventions/references/tracing.md`](../jetlinks-conventions/references/tracing.md).
 - Do not wrap pure synchronous helpers as `Mono` / `Flux`. Data conversion, field calculation, predicate checks, and other non-I/O logic should remain plain methods and be called from `map`, `filter`, or before entering the chain.
 - Do not call `collectList()` on unbounded or potentially large streams; only collect when the source is clearly bounded by page, limit, batch, protocol size, or validated input size. Prefer pagination, bounded `buffer` / `window`, streaming, or existing query-composition helpers.
 - Keep lambdas as glue code. If a lambda contains validation plus query plus mutation plus side effect, nested branching, loops, `try/catch`, or multiple DB / remote calls, extract a named method and test that method through the reactive chain.
@@ -39,6 +40,6 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 
 1. Current module execution model
 2. Reactive risks or blocking risks
-3. Official reactive boundary, recommended chain, operator semantics, chain readability, and batching / collection boundary
+3. Official reactive boundary, recommended chain, operator semantics, chain readability, tracing decision, and batching / collection boundary
 4. Design doc path and test goals when the backend design gate applies
 5. Verification evidence or exact pending commands

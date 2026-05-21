@@ -89,6 +89,13 @@
 - 不把嵌套 `flatMap` 当缩进版过程式代码；嵌套里超过一个业务动作时，先抽方法。
 - 拆出的响应式方法仍返回 `Mono` / `Flux`，让超时、重试、错误传播和测试仍能组合。
 
+### 链路追踪
+
+- 关键响应式业务阶段使用 `MonoTracer.create(...)` / `FluxTracer.create(...)` 或当前模块已有领域 tracer，不用 `doOnNext` / `doOnSuccess` 伪装成埋点。
+- span 放在真实异步边界或关键业务阶段上，例如命令发送、状态流转、事件发布、批处理、外部调用、协议解析。
+- trace context 跨 HTTP、RSocket、消息、事件、RuleData 等边界时，使用 `TraceHolder.readToContext(...)` / `TraceHolder.writeContextTo(...)`，不要用 `ThreadLocal` 自己传递。
+- span 名称和属性、敏感信息、批量粒度等规则见 [`../jetlinks-conventions/references/tracing.md`](../jetlinks-conventions/references/tracing.md)。
+
 ### 函数式组合示例
 
 已有普通对象时，直接调用第一个响应式边界：
@@ -178,6 +185,18 @@ private Mono<CommandResult> saveLogAndReturn(CommandResult result) {
 }
 ```
 
+响应式关键阶段埋点：
+
+```java
+return sendCommand(device, command)
+    .as(MonoTracer.create(
+        "/device/command/send",
+        builder -> {
+            builder.setAttribute("deviceId", device.getDeviceId());
+            builder.setAttribute("commandId", command.getCommandId());
+        }));
+```
+
 ### 错误传播
 
 - 对用户可见异常，优先在 `Mono.error(...)` / `Flux.error(...)` 中传递带 `i18nCode` 的异常实例。
@@ -215,6 +234,7 @@ private Mono<CommandResult> saveLogAndReturn(CommandResult result) {
 - 是否出现了 `block()`、嵌套 `subscribe()`、逐条低效调用
 - 是否存在无意义算子、重复过滤、过大的 lambda
 - 是否存在难以一眼看懂的长链；是否已按业务阶段拆成命名方法
+- 关键业务阶段是否有 TraceHolder / MonoTracer / FluxTracer 埋点判断
 - 是否对 `collectList()` 给出了明确的数据边界
 - 是否把复杂副作用合理拆到了事件层
 - 是否保持了链路返回类型与相邻代码一致
