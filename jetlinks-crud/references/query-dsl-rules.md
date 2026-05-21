@@ -26,6 +26,10 @@
    - 分页转换优先 `QueryHelper.transformPageResult(...)`。
    - 一对多装配优先 `QueryHelper.combineOneToMany(...)`。
 
+6. 链路复杂度较高
+   - 查询构造、权限注入、排序分页、结果装配、副作用不要全部压进一个 `return` 链。
+   - 用命名的 `QueryParamEntity`、`buildXxxQuery(...)`、`injectXxxPermission(...)`、`fillXxx(...)` 拆出阶段。
+
 ## 常用链路
 
 ### 基础条件
@@ -120,6 +124,22 @@ QueryParamEntity query = QueryParamEntity
 - 对外部传入参数追加条件时优先 `param.toNestQuery(q -> q.and(...))`，保留原分页、排序和筛选。
 - 只补默认排序时，直接 `param.toQuery().orderByAsc(...)`，不要重建整个 QueryParam。
 - 需要取消分页或指定分页时，跟随当前模块已有 `noPaging()` / `doPaging(page, size)` 用法。
+
+### DSL 可读性
+
+- 简单查询可以保持链式 DSL；复杂查询先给中间参数或查询对象命名。
+- 嵌套条件、权限注入、默认排序、分页转换、父子装配同时出现时，拆成多个命名步骤。
+- 不为了“一行 return”牺牲可读性；调用处应能看出业务阶段，而不是只看到一长串 DSL。
+
+示例：
+
+```java
+QueryParamEntity queryParam = buildDeviceQueryParam(request);
+
+return AssetsHolder
+    .injectQueryParam(queryParam, AssetType.device, DeviceEntity::getId)
+    .flatMap(param -> QueryHelper.queryPager(param, service::createQuery));
+```
 
 ### AssetsHolder 查询注入
 
@@ -226,6 +246,7 @@ return QueryHelper.combineOneToMany(
 - 拼接动态 SQL 字符串，导致筛选组合一多就膨胀出大量 SQL 分支。
 - 未经用户明确要求就写特定数据库方言 SQL，导致多数据库部署不可用。
 - SQL 只按小样本跑通，没有按真实数据规模、分页深度、并发和索引情况做性能验证。
+- 查询、权限、排序、分页转换和结果装配全部塞进一条难以阅读的链式调用。
 - 自己复制分页元信息或手写父子集合装配，而不是用 `QueryHelper.transformPageResult` / `combineOneToMany`。
 - 为了省事手写租户、部门、创建人过滤，而不走 AssetsHolder。
 - 只 mock `fetch()` 返回值，不验证 DSL 是否包含关键条件、排序和权限注入。

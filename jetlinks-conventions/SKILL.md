@@ -27,6 +27,9 @@ Read [`references/code-conventions.md`](references/code-conventions.md) first.
 - Do not introduce i18n into a module unless the module already follows an i18n convention or the user explicitly asks for it.
 - When Apache Commons utilities are already available or aligned with adjacent code, prefer them for null or empty checks and common object or collection operations instead of handwritten repetitive branches.
 - Keep convention-driven changes scoped to the required consistency fix; do not expand into unrelated cleanup.
+- Prefer readable code over dense fluent chains. When a chained call mixes multiple business phases or becomes hard to summarize in one sentence, split it into named local variables, named private methods, or a small existing abstraction.
+- Do not force Java Stream or fluent style onto business workflows, protocol parsing, state transitions, or complex validation. Use imperative code when named intermediate results and early returns make the behavior clearer.
+- Do not hide side effects in `Stream.peek(...)`, `map` / `filter` lambdas, mutable external variables, or stream operations that call remote services, databases, caches, or event publishers.
 - When convention-related code changes are made, report the validation performed or the exact pending commands and unresolved convention risks.
 - For user-visible exceptions, prefer the local exception pattern that carries `i18nCode` or message key plus args; do not hardcode Chinese or English text in exception constructors.
 - When the framework, SDK, third-party library, or existing API does not directly satisfy the requirement, solve the root cause via official extension points, adjacent module abstractions, dependency adjustments, or by informing the user with concrete trade-offs; do not use reflection / `Unsafe` / visibility bypass / copied source / monkey patches / bytecode injection / hidden access-level changes as a silent workaround. If such an option is the only path, explain the limitation and obtain user confirmation before applying it. See [`references/root-cause-and-no-hack-rules.md`](references/root-cause-and-no-hack-rules.md).
@@ -41,4 +44,5 @@ Read [`references/code-conventions.md`](references/code-conventions.md) first.
 3. I18n decision or unresolved import/i18n risks
 4. If a tool/API capability gap was hit, the root cause analysis, the chosen resolution path (official extension point / adjacent abstraction / dependency change / informing the user), and any usage of reflection / visibility bypass / copied source that was explicitly confirmed by the user
 5. Release-boundary decision when compatibility code is considered
-6. Verification evidence or exact pending commands
+6. Readability decision for long chained calls when relevant
+7. Verification evidence or exact pending commands
