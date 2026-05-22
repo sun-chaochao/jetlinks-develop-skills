@@ -43,7 +43,7 @@ jetlinks-develop-skills/
 
 ### `jetlinks-conventions`
 
-用于共享编码规范、注解/导入确认、命名约束、i18n 判断与实现，以及 TraceHolder 链路追踪和 MBean 运维可观测性判断。
+用于共享编码规范、注解/导入确认、命名约束、代码注释、i18n 判断与实现，以及 TraceHolder 链路追踪和 MBean 运维可观测性判断。
 
 ### `jetlinks-reactive`
 
@@ -91,7 +91,7 @@ jetlinks-develop-skills/
 
 - 不确定该用哪个 skill：`$jetlinks-router`
 - 只想处理协议包、编解码、认证或二进制报文：`$jetlinks-protocol`
-- 只想确认代码规范、导入、i18n 判断、国际化实现、TraceHolder 埋点边界或 MBean 运维可观测性：`$jetlinks-conventions`
+- 只想确认代码规范、导入、注释、i18n 判断、国际化实现、TraceHolder 埋点边界或 MBean 运维可观测性：`$jetlinks-conventions`
 - 只想处理响应式链路：`$jetlinks-reactive`
 - 只想找模块或新建模块：`$jetlinks-routing`
 - 只想做 CRUD 或复杂查询：`$jetlinks-crud`
@@ -174,6 +174,7 @@ Focused skill 示例：
 - 使用 `$jetlinks-crud` 为设备管理模块新增一个查询接口。
 - 使用 `$jetlinks-assets-permission` 判断一个 CRUD 或自定义查询接口是否需要 `AssetsHolder` 数据权限控制，并选择 `@AssetsController`、`AssetsHolderCrudController`、`CorrelatesAssetsHolderCrudController` 或 `AssetsHolder.injectQueryParam`。
 - 使用 `$jetlinks-reactive` 优化当前 `Mono` / `Flux` 链路并避免阻塞。
+- 使用 `$jetlinks-conventions` 判断复杂代码、公共类、SPI 方法应该如何写注释，以及是否需要 `@since` / `@see`。
 - 使用 `$jetlinks-conventions` 判断关键业务链路是否需要 TraceHolder 埋点，并给出 span、属性和上下文传播方案。
 - 使用 `$jetlinks-conventions` 判断常驻任务、缓存、队列或重试池是否需要 MBean，并给出统计、监控和运维操作方案。
 - 使用 `$jetlinks-boundary` 判断该能力应该走直接依赖还是命令服务。
@@ -247,6 +248,13 @@ Focused skill 示例：
 ```text
 我正在设计 <常驻任务 / 缓存 / 队列>。
 先分析是否需要 MBean，列出统计指标、监控字段和可安全执行的运维操作。
+```
+
+### 代码注释
+
+```text
+我正在整理 <模块 / 功能> 的代码可读性。
+帮我检查哪些类、SPI 方法和复杂逻辑需要注释，必要时补 @since / @see，但避免逐行解释。
 ```
 
 ### Bug 定位
@@ -352,6 +360,7 @@ JetLinks 项目交付代码时，默认遵循以下规范：
 - 较大的后端改动或新功能必须先形成设计稿、任务拆分和测试目标，并落到当前工作区对应文档目录。
 - 设计稿必须经过用户明确确认后才能进入开发；若实现过程中发现设计假设不成立，先更新设计稿并重新确认。
 - 测试目标必须先于实现制定，映射真实使用场景和真实数据形态，而不是为了让测试通过而补形式化用例。
+- 复杂业务、公共契约、SPI 扩展点、兼容逻辑、并发 / 生命周期保护、安全边界、TraceHolder 和 MBean 决策必须有合理注释；类注释和 SPI 接口方法注释必须完整，SPI 必要时补真实 `@since` 和指向订阅相关类型 / 参考实现的 `@see`。
 - 涉及 CRUD 查询、详情、更新、删除、批量操作、导出或自定义接口时，必须按 `$jetlinks-assets-permission` 分析是否需要 AssetsHolder 数据权限控制；资产类型、关联字段、权限动作、绑定关系或例外规则拿不准时先询问用户。
 - 涉及关键后端业务链路、状态流转、命令执行、事件 / 订阅、协议链路、批处理或外部 I/O 时，必须说明 TraceHolder / MonoTracer / FluxTracer 埋点目标、关键属性、上下文传播和敏感信息排除；不新增埋点时说明已有平台自动追踪或不适用依据。
 - 涉及常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器或后台执行器时，必须说明 MBean 运维可观测性决策、统计指标、监控字段、安全内部操作、生命周期和敏感信息排除；不新增 MBean 时说明已有覆盖或不适用依据。
@@ -388,7 +397,7 @@ PR 描述必须聚焦事实和结果，至少包含：
 
 - 目的：为什么要做这次改动
 - 核心变动：改了哪些模块、行为和边界
-- 设计与测试目标：较大后端改动或新功能需列出设计稿路径、确认状态、测试目标达成情况、CRUD / AssetsHolder 数据权限分析结论、链路追踪结论和 MBean 运维可观测性结论
+- 设计与测试目标：较大后端改动或新功能需列出设计稿路径、确认状态、测试目标达成情况、CRUD / AssetsHolder 数据权限分析结论、注释 / 公共契约结论、链路追踪结论和 MBean 运维可观测性结论
 - 测试结果：命令、新增或更新的测试类、通过数、失败数、跳过数、覆盖率数据、集成测试结果或不适用原因
 - 文档同步情况：已同步哪些原始文档，或说明无需同步的原因
 - 兼容性与发布边界：说明是否为 PR 内未发布逻辑收敛；已发布、持久化或外部依赖的变更需写清兼容或迁移策略
@@ -413,6 +422,7 @@ PR 描述必须聚焦事实和结果，至少包含：
 - 设计稿：`docs/plans/yyyy-mm-dd-xxx.md`
 - 用户确认：已确认 / 未确认，当前为 draft
 - 测试目标：真实场景、真实数据、正常路径、异常路径、回归路径和边界路径均已覆盖 / 列出未覆盖原因
+- 注释 / 公共契约：适用 / 不适用；适用时说明类注释、SPI 方法注释、必要 `@since` / `@see` 和复杂逻辑注释已补齐
 - 数据权限：适用 / 不适用；适用时说明 `AssetType`、`CrudAssetPermission`、查询注入、操作校验和关联资产边界
 - 数据库兼容与性能：适用 / 不适用；适用时说明标准 SQL / 方言范围、索引与分页风险、压测结果或替代验证
 - 链路追踪：适用 / 不适用；适用时说明 TraceHolder / MonoTracer / FluxTracer 埋点位置、关键属性、上下文传播和敏感信息排除
@@ -437,6 +447,7 @@ PR 描述必须聚焦事实和结果，至少包含：
 
 - 影响范围：
 - 兼容性与发布边界：
+- 注释 / 公共契约：
 - 数据库兼容与 SQL 性能：
 - 链路追踪 / 可观测性：
 - MBean / 运维可观测性：

@@ -24,7 +24,7 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 ## Routing
 
 - Protocol package registration, transport codecs, and binary packet handling: [`../jetlinks-protocol/SKILL.md`](../jetlinks-protocol/SKILL.md)
-- Shared coding conventions, imports, i18n habits, tracing, and MBean observability: [`../jetlinks-conventions/SKILL.md`](../jetlinks-conventions/SKILL.md)
+- Shared coding conventions, comments, imports, i18n habits, tracing, and MBean observability: [`../jetlinks-conventions/SKILL.md`](../jetlinks-conventions/SKILL.md)
 - Reactive and non-blocking implementation practice: [`../jetlinks-reactive/SKILL.md`](../jetlinks-reactive/SKILL.md)
 - Workspace discovery, module placement, and module creation: [`../jetlinks-routing/SKILL.md`](../jetlinks-routing/SKILL.md)
 - Standard or advanced CRUD work: [`../jetlinks-crud/SKILL.md`](../jetlinks-crud/SKILL.md)
@@ -46,6 +46,7 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 - Do not implement large backend changes or new backend features before a design draft and test goals have been written to the appropriate docs directory and explicitly confirmed by the user.
 - Do not place task logs, test reports, PR descriptions, or temporary design notes into README files; README is for durable repository or module overview.
 - Do not treat tests as a checkbox: test goals must map to realistic business scenarios and data, and failures must drive root-cause analysis rather than weaker assertions.
+- For complex or non-obvious code, state the comment decision in the implementation summary: concise comments added for business intent / boundary / compatibility / lifecycle, complete class/SPI method comments added for public contracts, `@since` / `@see` added where useful for SPI contract navigation, or no implementation comments needed because the touched code is straightforward. Route detailed rules to [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md).
 - For complex SQL, native SQL, aggregation, joins, deep pagination, or batch writes, prefer standard SQL and existing QueryHelper / DSL abstractions. Only accept database-specific dialect SQL when the user explicitly requires that database or the module is already database-specific; document dialect risk and require pressure testing or equivalent performance evidence.
 - For critical backend business flows, state the TraceHolder tracing decision in the design or implementation summary: manual spans added, existing platform tracing coverage, or not applicable. Route detailed rules to [`../jetlinks-conventions/references/tracing.md`](../jetlinks-conventions/references/tracing.md).
 - For long-lived in-memory tasks, caches, queues, buffers, retry pools, and session / connection / subscription managers, state the MBean observability decision in the design or implementation summary: MBean added, existing MBean / monitor covered, or not applicable. Route detailed rules to [`../jetlinks-conventions/references/mbean-observability.md`](../jetlinks-conventions/references/mbean-observability.md).
@@ -69,10 +70,11 @@ When analyzing first:
 5. Workspace facts to confirm
 6. Proposed code and document locations
 7. Release-boundary decision when compatibility is in question
-8. Database portability and performance test decision when SQL is involved
-9. TraceHolder tracing decision when critical backend flows are involved
-10. MBean observability decision when long-lived in-memory or cache behavior is involved
-11. Plan summary, test goals, or direct-execution rationale
+8. Comment decision when complex or non-obvious code is involved
+9. Database portability and performance test decision when SQL is involved
+10. TraceHolder tracing decision when critical backend flows are involved
+11. MBean observability decision when long-lived in-memory or cache behavior is involved
+12. Plan summary, test goals, or direct-execution rationale
 
 When implementing:
 

@@ -74,14 +74,19 @@
 
 13. 根因优先，禁用奇技淫巧：统一以 [`jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../../jetlinks-conventions/references/root-cause-and-no-hack-rules.md) 为准；router 不重复列举禁止清单。
 
-14. 常驻能力要考虑运维可观测性
+14. 注释要平衡人类可读性和模型上下文
+   - 复杂业务规则、兼容逻辑、并发 / 生命周期保护、安全边界、TraceHolder / MBean 决策等，需要结合 [`jetlinks-conventions/references/code-comments.md`](../../jetlinks-conventions/references/code-comments.md) 写短注释。
+   - 类注释和 SPI 接口方法注释必须完整，写清职责、调用时机、参数、返回、错误、副作用和实现约束；必要时补真实 `@since` 和指向订阅相关类型 / 参考实现的 `@see`。
+   - 简单赋值、DTO 搬运、直观方法调用不写噪声注释；优先用好命名和小方法，注释只解释原因和边界。
+
+15. 常驻能力要考虑运维可观测性
    - 涉及常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器或后台执行器时，必须结合 [`jetlinks-conventions/references/mbean-observability.md`](../../jetlinks-conventions/references/mbean-observability.md) 判断是否需要 MBean。
    - 目标是辅助运维快速定位问题：看统计、看状态、看最近错误，并在安全边界内刷新缓存、flush、compact 或手动重试。
 
 ## 标准工作流
 
 1. 分类任务
-    - 判断这是结构发现、模块创建、CRUD、复杂查询、跨服务调用、实时订阅、事件驱动、国际化、前端页面改造、MBean 运维可观测性还是导入/注解确认。
+    - 判断这是结构发现、模块创建、CRUD、复杂查询、跨服务调用、实时订阅、事件驱动、国际化、前端页面改造、代码注释、MBean 运维可观测性还是导入/注解确认。
 
 2. 判断是否进入 `plan-first`
     - 如果任务复杂、跨模块、需求仍在变化、涉及多个子任务，或存在多个方案 / 明显风险，先输出计划并等待用户确认。
@@ -161,6 +166,7 @@
 适用：
 - 不确定 `javax`/`jakarta`
 - 不确定实体、控制器、事件、命令、订阅的注解和导入
+- 需要判断复杂代码是否应该补注释，以及类注释 / SPI 方法注释是否完整，SPI 是否需要 `@since` / `@see`
 - 需要为常驻任务、缓存、队列或重试池判断 MBean 运维可观测性边界
 
 ### 创建新模块或聚合模块
