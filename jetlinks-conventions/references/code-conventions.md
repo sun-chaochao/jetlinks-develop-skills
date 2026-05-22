@@ -50,6 +50,11 @@
    - 使用平台 `TraceHolder` / `MonoTracer` / `FluxTracer`，记录稳定 span 名称和必要业务属性，不自造追踪封装。
    - 详细规则见 [`tracing.md`](tracing.md)。
 
+11. 常驻能力要便于运维定位
+   - 常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器等能力，主动判断是否需要提供 MBean。
+   - MBean 以辅助运维排障为目标，暴露统计、状态和安全内部操作，例如刷新缓存、flush、compact、手动重试、重置统计。
+   - 详细规则见 [`mbean-observability.md`](mbean-observability.md)。
+
 ## 常见落地要求
 
 ### 导入与注解
@@ -118,6 +123,7 @@ private boolean shouldTriggerAlarm(Device device, AlarmRule rule) {
 - 需要统一缓存抽象或响应式访问时，必须优先使用 `org.hswebframework.web.cache.ReactiveCache<E>`。
 - 需要本地 TTL / size 控制等 Caffeine 能力时，必须使用 `com.github.benmanes.caffeine.cache.Caffeine<K, V>` 构建缓存。
 - 只有在相邻模块已经存在更明确的缓存封装时，才沿用本地封装；不要新造第三套超时缓存实现。
+- 缓存如果是常驻能力或排障关键路径，设计时同步考虑 MBean：命中 / 未命中、大小、最后刷新时间、最近错误、刷新 / 清理 / 重载操作，以及敏感信息和返回数量边界。
 
 ### i18n
 
@@ -133,6 +139,7 @@ private boolean shouldTriggerAlarm(Device device, AlarmRule rule) {
 - 是否保持了目标模块的命名、注解和包结构
 - 是否避免了过长链式调用；复杂流程是否按业务阶段拆成命名步骤
 - 是否对关键业务路径做了 TraceHolder 链路追踪判断；需要埋点时是否记录了稳定、非敏感的关键信息
+- 是否对常驻任务、缓存、队列或重试池做了 MBean 运维可观测性判断；需要 MBean 时是否覆盖统计、监控和安全内部操作
 - 是否避免了无根据的 i18n、权限和资源命名
 - 如果写了兼容逻辑，是否有明确的已发布、持久化或外部依赖依据；同 PR 未发布中间形态是否已删除
 - 是否明确区分了“现有事实”和“低上下文默认”
