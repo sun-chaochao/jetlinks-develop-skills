@@ -74,10 +74,14 @@
 
 13. 根因优先，禁用奇技淫巧：统一以 [`jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../../jetlinks-conventions/references/root-cause-and-no-hack-rules.md) 为准；router 不重复列举禁止清单。
 
+14. 常驻能力要考虑运维可观测性
+   - 涉及常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器或后台执行器时，必须结合 [`jetlinks-conventions/references/mbean-observability.md`](../../jetlinks-conventions/references/mbean-observability.md) 判断是否需要 MBean。
+   - 目标是辅助运维快速定位问题：看统计、看状态、看最近错误，并在安全边界内刷新缓存、flush、compact 或手动重试。
+
 ## 标准工作流
 
 1. 分类任务
-    - 判断这是结构发现、模块创建、CRUD、复杂查询、跨服务调用、实时订阅、事件驱动、国际化、前端页面改造还是导入/注解确认。
+    - 判断这是结构发现、模块创建、CRUD、复杂查询、跨服务调用、实时订阅、事件驱动、国际化、前端页面改造、MBean 运维可观测性还是导入/注解确认。
 
 2. 判断是否进入 `plan-first`
     - 如果任务复杂、跨模块、需求仍在变化、涉及多个子任务，或存在多个方案 / 明显风险，先输出计划并等待用户确认。
@@ -157,6 +161,7 @@
 适用：
 - 不确定 `javax`/`jakarta`
 - 不确定实体、控制器、事件、命令、订阅的注解和导入
+- 需要为常驻任务、缓存、队列或重试池判断 MBean 运维可观测性边界
 
 ### 创建新模块或聚合模块
 
@@ -308,6 +313,11 @@
 - CRUD 后要同步其他数据
     - `$jetlinks-crud`
     - `$jetlinks-events`
+    - 如涉及响应式链路，再加 `$jetlinks-reactive`
+
+- 常驻缓存、重试队列或后台任务
+    - `$jetlinks-conventions`
+    - 如涉及事件 / 订阅消费，再加 `$jetlinks-events`
     - 如涉及响应式链路，再加 `$jetlinks-reactive`
 
 - 处理设备或系统消息流
