@@ -1,6 +1,6 @@
 ---
 name: jetlinks-delivery
-description: 为 JetLinks 代码变更准备合规交付内容。适用于需要创建符合分支策略的提交、起草或审查中文 Conventional Commit、生成 shell 可执行的 git commit 命令、遵循 JetLinks 提交标题规范、避免直推受保护分支、落实后端新增功能或行为变动的测试门禁、收集测试证据，或编写包含测试、覆盖率、TraceHolder 与 MBean 运维可观测性结论的 PR 描述的场景。
+description: 为 JetLinks 代码变更准备合规交付内容。适用于需要创建符合分支策略的提交、起草或审查中文 Conventional Commit、生成 shell 可执行的 git commit 命令、遵循 JetLinks 提交标题规范、避免直推受保护分支、落实后端新增功能或行为变动的测试门禁、收集测试证据，或编写包含测试、覆盖率、代码注释 / 公共契约（含 SPI 必要 @since / @see）、TraceHolder 与 MBean 运维可观测性结论的 PR 描述的场景。
 ---
 
 # JetLinks Delivery
