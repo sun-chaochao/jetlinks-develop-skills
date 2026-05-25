@@ -7,9 +7,9 @@ interface:
     一、方案档案（默认强制）：
     1)除非任务命中"局部调整白名单"（仅改一个表单字段 / 仅改一个筛选条件 / 仅改一个弹窗内容 / 仅样式与文案与组件 props 微调），任何新增页面、重构页面壳层、调整信息架构或主筛选 / 主列表 / 主详情承载方式都必须先建立方案档案；不要直接回退到传统后台表格 + 编辑弹窗。
     2)如果用户已明确"参考现在这个页面 / 沿用资产页 / 就按当前模板"，直接映射到最接近的方案继续。
-    3)否则读 `style-catalog-routing.md` 的"业务任务 → 方案路由"识别第一任务，给 1 个推荐方案和最多 3 个替代；每个候选的正文只从 `style-catalog-templates.md` 提取对应 `###` 节，不要加载文件其余部分。
-    4)给默认项 + 单句业务理由，不问"想要什么风格"这种开放问题；事实清楚且只有一个可信推荐时记录"默认采用推荐方案"并继续实现，关键事实缺失或 2 个以上方案同样合理时先让用户选择。
-    5)输出 solution profile：solutionName / primaryFilterSurface / contentSurface / detailCarrier / editMode / coreComponentsToVerify / actionPlacement / densityTarget / sidebarMode / confirmationMode / rejectedAlternatives。
+    3)否则读 `style-catalog-routing.md` 的"业务任务 → 方案路由"识别第一任务，给 1 个推荐方案和最多 3 个替代；每个候选的正文只从 `style-catalog-templates.md` 提取对应 `###` 节，不要加载文件其余部分；不要把标准管理表格页当作信息不足时的兜底，只有第一任务明确是批量检索 / 列对比 / 轻量 CRUD 时才推荐。
+    4)给默认项 + 单句业务理由，不问"想要什么风格"这种开放问题；事实清楚且只有一个可信推荐时记录"默认采用推荐方案"并继续实现，关键事实缺失或 2 个以上方案同样合理时先让用户选择；如果推荐标准管理表格页，必须说明为什么资产卡片台账 / 筛选工作台 / 详情工作区不更适合。
+    5)输出 solution profile：solutionName / primaryFilterSurface / contentSurface / detailCarrier / editMode / coreComponentsToVerify / actionPlacement / densityTarget / sidebarMode / confirmationMode / rejectedAlternatives / searchShellDecision。searchShellDecision 默认 ConditionFilter；只有窄改旧页、用户明确要求旧表格风格，或少量固定筛选且无路由回显、远程枚举 / 引用选项、保存搜索需求时，才写 ProSearch 并说明例外理由。
 
     二、重申硬约束（§1–§6 细则在 `style-catalog-core-base.md`，§7+ 在 `style-catalog-core-detail-shell.md`，此处按顺序点名，不要漏）：
     - 编辑触发梯度优先 inline > sectional > drawer > modal > page

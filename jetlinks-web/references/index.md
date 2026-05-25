@@ -15,6 +15,7 @@
 - [block-admission-rules.md](block-admission-rules.md): 判断统计卡、图表、快捷入口、概览区等区块是否值得存在
 - [business-ui-example-rules.md](business-ui-example-rules.md): 如何借鉴相似业务案例，以及哪些“看起来高级”的设计不应照搬
 - [condition-filter-rules.md](condition-filter-rules.md): 表达式搜索、Token 化条件输入、远程选项面板、条件路由与快捷筛选联动规则
+- [enum-rendering-rules.md](enum-rendering-rules.md): 后端 `EnumDict` / `I18nEnumDict` 返回 `{ value, text }` 时的显示、提交、筛选和回显规则
 - [state-management-rules.md](state-management-rules.md): 状态边界与 store 使用规则
 - [quality-and-type-rules.md](quality-and-type-rules.md): 质量约束与 TypeScript 约束
 - [example-locations.md](example-locations.md): 示例定位与检索命令
@@ -29,9 +30,10 @@
 6. 不确定某个区块、统计卡或图表该不该存在：`block-admission-rules.md`
 7. 需要借鉴案例但怕抄错场景：`business-ui-example-rules.md`
 8. 需要表达式搜索、通用筛选或远程选项筛选：`condition-filter-rules.md`
-9. 先判断复用能力再写代码：`capability-reuse-rules.md`
-10. 做 `visDashboard` 仪表盘组件：`dashboard-component-rules.md`
-11. 不确定代码放哪里：`directory-structure-rules.md`
-12. 状态边界不清晰：`state-management-rules.md`
-13. 交付前质量或类型风险检查：`quality-and-type-rules.md`
-14. 需要找真实实现样例：`example-locations.md`
+9. 接口字段来自 `EnumDict` / `I18nEnumDict` 或返回 `{ value, text }`：`enum-rendering-rules.md`
+10. 先判断复用能力再写代码：`capability-reuse-rules.md`
+11. 做 `visDashboard` 仪表盘组件：`dashboard-component-rules.md`
+12. 不确定代码放哪里：`directory-structure-rules.md`
+13. 状态边界不清晰：`state-management-rules.md`
+14. 交付前质量或类型风险检查：`quality-and-type-rules.md`
+15. 需要找真实实现样例：`example-locations.md`
