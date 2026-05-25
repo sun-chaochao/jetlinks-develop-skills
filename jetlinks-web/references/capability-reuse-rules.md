@@ -61,7 +61,7 @@
 | 场景 | 推荐组合 | 说明 |
 | --- | --- | --- |
 | 标准管理列表页（通用条件搜索） | `FullPage` + `ConditionFilter` + `j-pro-table` | 标准管理页默认优先组合 |
-| 标准管理列表页（旧页兼容 / 轻量固定筛选） | `FullPage` + `ProSearch` + `j-pro-table` | 仅在相邻页面稳定沿用或筛选很轻时使用 |
+| 标准管理列表页（旧页兼容 / 轻量固定筛选） | `FullPage` + `ProSearch` + `j-pro-table` | 仅窄改旧页、用户明确要旧表格风格，或筛选很轻且无路由回显 / 远程选项 / 保存搜索时使用；必须说明例外理由 |
 | 资产卡片台账页 | `ConditionFilter` + `QuickFilterSidebar` + `ResponsiveGrid` + `EntityCard` / `CardBox` | 设备资产、资源、模型、应用、通道等对象 |
 | 筛选工作台页 | `ConditionFilter` + `QuickFilterSidebar` + 摘要列表 / 卡片 | 高频筛选、状态处置、复杂记录定位 |
 | 对象详情工作区 | 对象摘要 + `SectionCard` + `KvGrid` + `TabsCard` + `StickyActionBar` | 单对象理解、维护、局部编辑和关联记录 |
@@ -81,7 +81,7 @@
 ## 高频组件关键契约
 
 - `ConditionFilter`：关注字段定义、条件模型、`encodeConditionFilterQuery` / `decodeConditionFilterQuery`、远程选项回显
-- `ProSearch`：关注 `columns`、`target`、`@search`
+- `ProSearch`：关注 `columns`、`target`、`@search`，并先确认它只是旧页兼容或轻量固定筛选例外
 - `j-pro-table`：关注 `columns`、`request`、`params`
 - `EditDialog`：关注 `schema`、`request`、`@save`、`@close`
 - `EntityCard` / `CardBox`：关注对象摘要、状态、标签、主动作和卡片选中态
@@ -204,6 +204,7 @@ const TestComponent = defineAsyncComponent(() => import('./xxxx/index.vue'));
 - 不要因为组件现成就反向决定页面结构；业务分型优先于组件组合。
 - 不要在交互方案还未让用户确认前，就直接进入传统 CRUD 组件组合。
 - 不要在 workspace 已提供 `ConditionFilter` 工具链时，仍把 `ProSearch` 当成通用搜索默认值。
+- 不要把“相邻页面仍使用 ProSearch”当成新页面的默认依据；除非是窄改旧页、用户明确要求旧表格风格，或当前筛选确实没有路由回显、远程枚举/引用选项和保存搜索需求，否则优先 `ConditionFilter`。
 - 不要因为某个字段是“项目/用户/区域/字典”就直接新增字段专属搜索组件；先复用 `ConditionFilter` 的通用选项值编辑路径。
 - 不要因为某个字段是时间范围、数值区间、嵌套路径或空值判断，就直接新增页面私有筛选组件；先复用标准条件、字段映射和通用值编辑器。
 - 不要重复手写卡片、详情字段栅格、抽屉壳、底部操作条、标签筛选或轻量编辑组件。

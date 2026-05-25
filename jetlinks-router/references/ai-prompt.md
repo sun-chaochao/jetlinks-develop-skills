@@ -269,7 +269,8 @@
 - 需要先分析业务目标，再决定交互方案，而不是默认 CRUD 表格页
 - 多方案时让用户选择业务交互方案；组件落地仍以 `jetlinks-web-core` 真实导出、组件实现和相邻页面用法为准
 - `jetlinks-project-ui-cli` 只在用户明确要求时作为外部参考，不是默认依赖或导入来源
-- 需要前端 i18n、ConditionFilter 优先级、轻量字段编辑、无意义数据规避或原型标注清理等细则时，直接遵循 `$jetlinks-web`
+- 需要前端 i18n、后端 `EnumDict` / `I18nEnumDict` 的 `{ value, text }` 渲染、ConditionFilter 优先级、轻量字段编辑、无意义数据规避或原型标注清理等细则时，直接遵循 `$jetlinks-web`
+- 标准管理表格页不是信息不足时的兜底；`ProSearch` 必须有窄改旧页、用户明确要求旧表格风格或轻量固定筛选的例外理由
 
 ### 知识沉淀与经验归档
 
