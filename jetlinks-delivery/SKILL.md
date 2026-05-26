@@ -18,7 +18,7 @@ Read [`references/git-and-pr-rules.md`](references/git-and-pr-rules.md) first.
 7. Run the relevant unit tests and required integration tests, then collect numeric evidence.
 8. Check whether the change also requires synchronizing existing owning documentation. Treat README as durable repository/module overview only; put test reports and PR evidence in PR/CI, and prefer updating an existing source document instead of creating a new task log.
 9. Before creating a ready PR for backend code changes, inspect the touched code for comment targets from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md); required comments must exist in code, not only in the PR description.
-10. Prepare the PR description with purpose, core changes, test data, coverage data, documentation sync status, and residual risks.
+10. Prepare the PR description by filling the canonical template in [`references/git-and-pr-rules.md`](references/git-and-pr-rules.md) exactly; keep headings, order, and blank lines unchanged. If the repo also has `.github/pull_request_template.md`, keep it synchronized as a mirror, but do not depend on it as the only source.
 
 ## Required Constraints
 
