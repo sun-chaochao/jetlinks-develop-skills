@@ -78,6 +78,7 @@
    - 复杂业务规则、兼容逻辑、并发 / 生命周期保护、安全边界、TraceHolder / MBean 决策等，需要结合 [`jetlinks-conventions/references/code-comments.md`](../../jetlinks-conventions/references/code-comments.md) 写短注释。
    - 类注释和 SPI 接口方法注释必须完整，写清职责、调用时机、参数、返回、错误、副作用和实现约束；必要时补真实 `@since` 和指向订阅相关类型 / 参考实现的 `@see`。
    - 简单赋值、DTO 搬运、直观方法调用不写噪声注释；优先用好命名和小方法，注释只解释原因和边界。
+   - 注释要求必须落到代码里；最终回复、设计稿或 PR 说明不能替代代码旁边的类注释、方法注释或关键分支短注释。
 
 15. 常驻能力要考虑运维可观测性
    - 涉及常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器或后台执行器时，必须结合 [`jetlinks-conventions/references/mbean-observability.md`](../../jetlinks-conventions/references/mbean-observability.md) 判断是否需要 MBean。

@@ -222,6 +222,13 @@ return sendCommand(device, command)
 - 不在响应式 consumer 里为了省事 `block`
 - 参数组装尽量靠近边界，不把远程契约扩散到业务内部
 
+### 注释边界
+
+- 长链拆出的命名方法如果仍然承载非显而易见的异步边界、权限 / 命令 / 持久化顺序、重试 / 超时策略、取消语义、上下文传播或批量上限，需要在方法或关键分支前写短注释。
+- `collectList()`、`buffer`、`window`、并发 `flatMap`、`take` / limit 等涉及数据边界或背压的地方，如果边界来自业务假设或协议限制，必须注释说明来源。
+- TraceHolder / MonoTracer / FluxTracer 的 span 名称和属性选择如果看起来保守或刻意缺少 payload，需要注释说明敏感信息和基数边界。
+- 直接 `map(this::toView)`、`flatMap(repository::save)`、`thenReturn(result)` 等语义清晰的链路胶水不写注释。
+
 ## 测试目标
 
 - 用 `StepVerifier` 或项目既有测试方式验证值、完成 / 错误信号、顺序、并发、超时、重试和副作用
@@ -236,6 +243,7 @@ return sendCommand(device, command)
 - 是否存在难以一眼看懂的长链；是否已按业务阶段拆成命名方法
 - 关键业务阶段是否有 TraceHolder / MonoTracer / FluxTracer 埋点判断
 - 是否对 `collectList()` 给出了明确的数据边界
+- 是否为非显而易见的异步边界、批量 / 背压限制、重试 / 超时、生命周期清理、上下文传播补了必要代码注释
 - 是否把复杂副作用合理拆到了事件层
 - 是否保持了链路返回类型与相邻代码一致
 - 是否对高频或批量场景做了批处理而不是逐条处理

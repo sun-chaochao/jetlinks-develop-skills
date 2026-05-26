@@ -16,7 +16,8 @@ Read [`references/common-crud-rules.md`](references/common-crud-rules.md) first.
 5. If the task includes complex query, batch processing, or CRUD side effects, read [`references/advanced-crud-rules.md`](references/advanced-crud-rules.md).
 6. If the task includes custom `termType`, QueryParam condition mapping, related-table filters, or `SubTableTermFragmentBuilder`-style exists queries, also read [`references/dynamic-term-rules.md`](references/dynamic-term-rules.md).
 7. Pair with `$jetlinks-assets-permission` whenever CRUD query, detail, update, delete, batch operation, export, or custom endpoint needs data permission control through AssetsHolder.
-8. Pair with `$jetlinks-conventions` or `$jetlinks-reactive` when imports, i18n, or reactive style need extra care.
+8. Before implementing, identify comment targets from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md): public Entity / DTO / Controller / Service contracts, custom endpoints, non-obvious validation, AssetsHolder boundaries, compatibility, batch limits, lifecycle guards, and complex QueryHelper / SQL / DSL decisions.
+9. Pair with `$jetlinks-conventions` or `$jetlinks-reactive` when imports, i18n, comments, or reactive style need extra care.
 
 ## Required Constraints
 
@@ -33,6 +34,7 @@ Read [`references/common-crud-rules.md`](references/common-crud-rules.md) first.
 - Do not implement a large CRUD feature before the design draft, task breakdown, and realistic test goals have been documented and confirmed.
 - For any CRUD query, detail, update, delete, batch operation, export, or custom endpoint, analyze whether AssetsHolder data permission control is required. Route implementation details to `$jetlinks-assets-permission`. If asset type, related asset field, permission action, binding relation, or admin / tenant / platform exception semantics are unclear, ask the user before implementation.
 - Do not weaken tests to satisfy the CRUD gate; tests must assert realistic business results, persistence effects, permissions, validation, and regression paths that matter to the change.
+- Do not leave generated CRUD code comment-free when it adds public classes, custom endpoints, permission boundaries, complex query composition, compatibility, batch limits, or non-obvious validation. Add concise code comments at those points; skip comments only for plain fields, standard inherited CRUD, direct DTO mapping, or obvious one-line delegation.
 - When CRUD code changes are made, run relevant validation when possible; otherwise state the exact pending commands and remaining CRUD risks.
 - For validation, not-found, and conflict errors visible to users, prefer the module's i18n-aware exception pattern over hardcoded exception messages.
 
@@ -46,5 +48,6 @@ Read [`references/common-crud-rules.md`](references/common-crud-rules.md) first.
 6. Whether QueryHelper or batch update/delete DSL is needed
 7. CRUD DSL readability decision when chains become complex
 8. Database portability and performance evidence when SQL is involved
-9. Verification evidence or exact pending commands
-10. Remaining CRUD risks
+9. Comment targets added, or the concrete reason no code comments were needed
+10. Verification evidence or exact pending commands
+11. Remaining CRUD risks

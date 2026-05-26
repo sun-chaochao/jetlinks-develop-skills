@@ -17,7 +17,8 @@ Read [`references/git-and-pr-rules.md`](references/git-and-pr-rules.md) first.
 6. If the change adds backend functionality or changes existing backend behavior, ensure corresponding unit tests are added or updated before PR preparation.
 7. Run the relevant unit tests and required integration tests, then collect numeric evidence.
 8. Check whether the change also requires synchronizing existing owning documentation. Treat README as durable repository/module overview only; put test reports and PR evidence in PR/CI, and prefer updating an existing source document instead of creating a new task log.
-9. Prepare the PR description with purpose, core changes, test data, coverage data, documentation sync status, and residual risks.
+9. Before creating a ready PR for backend code changes, inspect the touched code for comment targets from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md); required comments must exist in code, not only in the PR description.
+10. Prepare the PR description with purpose, core changes, test data, coverage data, documentation sync status, and residual risks.
 
 ## Required Constraints
 
@@ -30,6 +31,7 @@ Read [`references/git-and-pr-rules.md`](references/git-and-pr-rules.md) first.
 - Do not default to creating a new per-task document or archive log; follow repo-local documentation rules and prefer updating existing docs.
 - Do not put single-task test reports, PR descriptions, temporary plans, or troubleshooting logs into README files.
 - Do not emit multi-line `git commit` commands that rely on literal `\n` becoming real newlines.
+- Do not create a ready PR for backend code changes when public contracts, SPI methods, complex business branches, compatibility, permissions, lifecycle, tracing, MBean, protocol, event, or boundary logic need comments but the touched code lacks them. Fix the code comments first, or create a draft with the exact blocker.
 
 ## Response Shape
 
