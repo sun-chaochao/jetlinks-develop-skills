@@ -13,7 +13,8 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 2. If this is a new backend feature or large reactive behavior change, first follow [`../jetlinks-router/references/backend-design-test-driven-rules.md`](../jetlinks-router/references/backend-design-test-driven-rules.md): write the design draft and realistic test goals to the appropriate docs directory and wait for explicit user confirmation.
 3. If the module is reactive, keep `Mono` or `Flux` end-to-end and avoid imperative fallbacks.
 4. If blocking I/O is unavoidable, isolate it explicitly and only use the scheduler pattern already accepted by the codebase.
-5. Combine this skill with `$jetlinks-crud`, `$jetlinks-boundary`, or `$jetlinks-events` when the task spans those scenarios.
+5. Before editing non-trivial reactive code, identify comment targets from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md): async boundaries, backpressure or collection limits, cancellation / retry / timeout behavior, lifecycle cleanup, tracing context propagation, compatibility, and extracted business stages whose purpose is not obvious from the method name.
+6. Combine this skill with `$jetlinks-crud`, `$jetlinks-boundary`, or `$jetlinks-events` when the task spans those scenarios.
 
 ## Required Constraints
 
@@ -34,6 +35,7 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 - When the reactive API or library does not satisfy the requirement (signature mismatch, missing extension point, serialization error inside the chain), follow [`../jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../jetlinks-conventions/references/root-cause-and-no-hack-rules.md): solve at the root via official extension points / adjacent abstractions / dependency choice, or inform the user with concrete trade-offs; do not use reflection / visibility hacks / copied source / silent `catch` to make the chain compile.
 - Do not implement a large reactive change before the design draft, backpressure or batching expectations, failure behavior, and realistic test goals have been documented and confirmed.
 - Do not make reactive tests pass by sleeping, swallowing errors, ignoring dropped signals, or weakening assertions; verify emitted values, completion or error signals, ordering, concurrency, retry, timeout, and side effects that match real usage.
+- Do not leave complex reactive chains or extracted reactive stages comment-free when they encode non-obvious async boundaries, batching / backpressure limits, retry / timeout policy, lifecycle cleanup, compatibility, or tracing context propagation. Add concise comments in the code; skip comments for direct `map` / `flatMap` glue with self-explanatory method names.
 - When reactive code changes are made, run relevant validation when possible; otherwise state the exact pending commands and residual blocking risks.
 
 ## Response Shape
@@ -42,4 +44,5 @@ Read [`references/reactive-practice.md`](references/reactive-practice.md) first.
 2. Reactive risks or blocking risks
 3. Official reactive boundary, recommended chain, operator semantics, chain readability, tracing decision, and batching / collection boundary
 4. Design doc path and test goals when the backend design gate applies
-5. Verification evidence or exact pending commands
+5. Comment targets added, or the concrete reason no code comments were needed
+6. Verification evidence or exact pending commands

@@ -29,6 +29,7 @@ If the input is incomplete, list the missing protocol facts as pending items and
 - Keep checksum, escaping, BCD, time, string, coordinate, unit conversion, and bit-mask parsing in reusable helpers instead of duplicating byte math across messages.
 - Keep request-reply caches, segmentation managers, file-upload managers, and timeout cleanup isolated from stateless decode logic.
 - Keep resource files discoverable: SPI provider file, `metadata/device-metadata.json`, transport documents, README examples, and packet samples when present.
+- Add contract comments on public providers, codecs, parsers, and packet registries. Non-obvious wire rules such as endian, length field, escape, sequence correlation, auth order, ByteBuf ownership, or released compatibility need short code comments next to the rule.
 
 ## ByteBuf and binary rules
 
@@ -49,6 +50,7 @@ If the input is incomplete, list the missing protocol facts as pending items and
 
 - The provider is visible through SPI and registers the expected transports.
 - The identity field, credential type, and authentication flow are explainable from code and docs.
+- Public providers, codecs, parsers, and packet registries have useful contract comments, and non-obvious wire or lifecycle rules are commented next to the implementation.
 - Parser tests cover complete frame, sticky packet, split packet, invalid frame, and checksum or escape cases when applicable.
 - Upstream decoding emits usable JetLinks messages with device ID and semantic payload.
 - Downstream encoding can produce at least one real control, query, or reply packet.

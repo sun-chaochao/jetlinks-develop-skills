@@ -31,3 +31,4 @@
 - Upstream decode and downstream encode remain symmetric where the protocol expects symmetry.
 - Docs, examples, and tests still describe the current wire behavior.
 - Any compatibility risk is called out explicitly when message fields or transport routes change.
+- Code comments exist where the implementation encodes non-obvious wire contracts, framing / endian assumptions, sequence or ACK correlation, ByteBuf ownership, auth order, transport-specific differences, or released compatibility.

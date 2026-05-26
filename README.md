@@ -171,10 +171,10 @@ Focused skill 示例：
 
 - 使用 `$jetlinks-routing` 判断这个能力应该落在哪个模块。
 - 使用 `$jetlinks-protocol` 分析协议包入口、编解码链路和二进制报文。
-- 使用 `$jetlinks-crud` 为设备管理模块新增一个查询接口。
-- 使用 `$jetlinks-assets-permission` 判断一个 CRUD 或自定义查询接口是否需要 `AssetsHolder` 数据权限控制，并选择 `@AssetsController`、`AssetsHolderCrudController`、`CorrelatesAssetsHolderCrudController` 或 `AssetsHolder.injectQueryParam`。
-- 使用 `$jetlinks-reactive` 优化当前 `Mono` / `Flux` 链路并避免阻塞。
-- 使用 `$jetlinks-conventions` 判断复杂代码、公共类、SPI 方法应该如何写注释，以及是否需要 `@since` / `@see`。
+- 使用 `$jetlinks-crud` 为设备管理模块新增一个查询接口，并在自定义接口、复杂校验、权限边界或复杂查询处补必要代码注释。
+- 使用 `$jetlinks-assets-permission` 判断一个 CRUD 或自定义查询接口是否需要 `AssetsHolder` 数据权限控制，并选择 `@AssetsController`、`AssetsHolderCrudController`、`CorrelatesAssetsHolderCrudController` 或 `AssetsHolder.injectQueryParam`；自定义权限边界必须在代码旁边说明。
+- 使用 `$jetlinks-reactive` 优化当前 `Mono` / `Flux` 链路并避免阻塞；非显而易见的异步边界、批量 / 背压限制、上下文传播要补短注释。
+- 使用 `$jetlinks-conventions` 判断复杂代码、公共类、SPI 方法应该如何写注释，以及是否需要 `@since` / `@see`；注释要求必须落到代码里，不能只写在回复或 PR 描述中。
 - 使用 `$jetlinks-conventions` 判断关键业务链路是否需要 TraceHolder 埋点，并给出 span、属性和上下文传播方案。
 - 使用 `$jetlinks-conventions` 判断常驻任务、缓存、队列或重试池是否需要 MBean，并给出统计、监控和运维操作方案。
 - 使用 `$jetlinks-boundary` 判断该能力应该走直接依赖还是命令服务。
@@ -361,6 +361,7 @@ JetLinks 项目交付代码时，默认遵循以下规范：
 - 设计稿必须经过用户明确确认后才能进入开发；若实现过程中发现设计假设不成立，先更新设计稿并重新确认。
 - 测试目标必须先于实现制定，映射真实使用场景和真实数据形态，而不是为了让测试通过而补形式化用例。
 - 复杂业务、公共契约、SPI 扩展点、兼容逻辑、并发 / 生命周期保护、安全边界、TraceHolder 和 MBean 决策必须有合理注释；类注释和 SPI 接口方法注释必须完整，SPI 必要时补真实 `@since` 和指向订阅相关类型 / 参考实现的 `@see`。
+- 注释门禁必须在实现技能中执行：编码前识别注释点，编码时把注释放到类、方法、关键分支或边界调用旁边；只有简单赋值、DTO 搬运、直观委托或模板展示可以明确说明不需要注释。
 - 涉及 CRUD 查询、详情、更新、删除、批量操作、导出或自定义接口时，必须按 `$jetlinks-assets-permission` 分析是否需要 AssetsHolder 数据权限控制；资产类型、关联字段、权限动作、绑定关系或例外规则拿不准时先询问用户。
 - 涉及关键后端业务链路、状态流转、命令执行、事件 / 订阅、协议链路、批处理或外部 I/O 时，必须说明 TraceHolder / MonoTracer / FluxTracer 埋点目标、关键属性、上下文传播和敏感信息排除；不新增埋点时说明已有平台自动追踪或不适用依据。
 - 涉及常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器或后台执行器时，必须说明 MBean 运维可观测性决策、统计指标、监控字段、安全内部操作、生命周期和敏感信息排除；不新增 MBean 时说明已有覆盖或不适用依据。

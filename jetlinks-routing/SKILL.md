@@ -13,7 +13,8 @@ Read [`references/module-list.md`](references/module-list.md) first.
 2. If the request creates a new backend module or large backend capability, first follow [`../jetlinks-router/references/backend-design-test-driven-rules.md`](../jetlinks-router/references/backend-design-test-driven-rules.md): write the design draft and realistic test goals to the appropriate docs directory and wait for explicit user confirmation.
 3. Identify the candidate business modules and explain why each one matches the request.
 4. If no existing module fits, read [`references/module-creation-rules.md`](references/module-creation-rules.md) and create the smallest compliant module structure.
-5. Prefer extending an existing module before creating a new one.
+5. When creating a module that includes public contracts, starter configuration, SPI registration, or first sample code, identify comment targets from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md).
+6. Prefer extending an existing module before creating a new one.
 
 ## Required Constraints
 
@@ -22,6 +23,7 @@ Read [`references/module-list.md`](references/module-list.md) first.
 - Do not create a new module just because the static list is unclear.
 - Keep module placement or creation changes scoped to the requested capability; do not reshuffle unrelated modules or aggregators.
 - Do not create a new backend module or large capability before documenting and confirming the design, module responsibilities, dependency boundaries, test goals, and data permission implications.
+- Do not create public module contracts, configuration classes, SPI registration entry points, or first sample code without useful class / contract comments when they establish the module's extension boundary.
 - If module or structure changes are made, report the validation performed or the exact pending commands and placement risks.
 
 ## Response Shape
@@ -31,4 +33,5 @@ Read [`references/module-list.md`](references/module-list.md) first.
 3. Recommended code location
 4. Design doc path and test goals when the backend design gate applies
 5. Whether a new module is required
-6. Validation notes or pending commands
+6. Comment targets added, or the concrete reason no code comments were needed
+7. Validation notes or pending commands
