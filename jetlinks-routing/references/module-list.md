@@ -30,6 +30,7 @@
 4. 看模块内部结构
    - 观察是否存在 `entity`、`service`、`web`、`command`、`configuration`、`events`、`resources/i18n` 等目录。
    - 观察是否存在 `core`、`manager`、`api`、`starter`、`plugin`、`adapter` 等分层。
+   - 如果存在 `manager` / `core` 分层，通常 `manager` 承载 CRUD、Controller、应用 Service、持久化、权限、i18n 和运行时装配；`core` 承载公共 domain、DTO、命令 / 事件定义、常量、SPI / 扩展接口等契约。
 
 5. 识别软链接目标
    - 如果目录是符号链接，需要同时确认：
@@ -53,7 +54,7 @@
 - 如果模块主要提供实体、服务、控制器，通常是业务实现模块。
 - 如果模块主要提供工具、公共能力、基础设施，通常是组件或基础能力模块。
 - 如果目录下只有 `pom.xml` 和子模块声明，通常是聚合模块。
-- 如果模块只暴露 DTO、常量、接口、命令契约，通常是对外契约模块。
+- 如果模块只暴露 DTO、常量、接口、命令契约，通常是对外契约模块；在 JetLinks manager/core 分层下优先识别为 `core`，不要默认推导为额外的 `api` 模块。
 
 ### 判断代码应落到哪里
 
