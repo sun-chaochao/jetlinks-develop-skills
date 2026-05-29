@@ -180,6 +180,11 @@
 - 调整聚合 `pom.xml`、自动配置、资源目录
 - 空脚手架中首次创建业务模块
 
+边界：
+- 如果存在 `manager` / `core` 分层，CRUD、Controller、应用 Service、持久化 Entity / Repository、权限校验、i18n 和运行时装配归 `manager`。
+- `core` 只承载公共 domain、DTO、命令 / 事件定义、常量、SPI / 扩展接口等跨模块契约。
+- 不因“需要 CRUD”“存在 DTO”“以后可能复用”把 CRUD 放进 `core`，也不默认创建 `xxx-api`。
+
 ### 标准 CRUD
 
 切换：
@@ -190,7 +195,7 @@
 - 标准增删改查
 - 权限、校验、基础 i18n
 - AssetsHolder 数据权限可见范围、详情访问、更新删除校验、批量操作和导出边界判断
-- 空脚手架中首次创建基础 CRUD 骨架
+- 空脚手架中首次创建基础 CRUD 骨架；若存在 `manager` / `core` 分层，CRUD 骨架落到 `manager`，公共 DTO / 命令契约才落到 `core`
 
 ### 复杂 CRUD / 查询 / 批处理
 

@@ -22,6 +22,7 @@ Read [`references/module-list.md`](references/module-list.md) first.
 - Do not ignore symlinked modules or external subprojects linked into the workspace.
 - Do not create a new module just because the static list is unclear.
 - Keep module placement or creation changes scoped to the requested capability; do not reshuffle unrelated modules or aggregators.
+- When a workspace uses `manager` / `core` layering, place CRUD, controllers, application services, persistence, permissions, i18n, and runtime wiring in `manager`; keep `core` limited to shared domain objects, DTOs, commands, events, constants, SPI, and extension contracts. Do not create `xxx-api` by default.
 - Do not create a new backend module or large capability before documenting and confirming the design, module responsibilities, dependency boundaries, test goals, and data permission implications.
 - Do not create public module contracts, configuration classes, SPI registration entry points, or first sample code without useful class / contract comments when they establish the module's extension boundary.
 - If module or structure changes are made, report the validation performed or the exact pending commands and placement risks.
