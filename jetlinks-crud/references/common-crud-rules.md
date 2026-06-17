@@ -34,6 +34,7 @@
 
 3. 查询能力优先复用已有 `_query` 或 QueryParam 体系
    - 不为每个字段单独造接口。
+   - 涉及 `createQuery()`、`createUpdate()`、`createDelete()`、排序、嵌套条件、分页、QueryParam 改写、复杂 SQL 或多查询组合时，读取 `query-dsl-rules.md`。
 
 4. 空模板仓库允许生成首个 CRUD 参考实现
    - 如果目标仓库没有可参考的 Entity / Service / Controller，不要停在“缺少样例”。
@@ -127,6 +128,13 @@
    - 不要直接 `throw new XxxException("名称已存在")`
    - 若本地异常模型只支持 `message`，再在边界层回退到本地化后的 message
 
+## 注释落地
+
+- 新增或修改对外 Entity、DTO、Controller、Service、Command、Event 时，按公共契约补类注释；标准继承型 CRUD 若完全无自定义语义，可沿用相邻模块简化。
+- 自定义接口、复杂校验、AssetsHolder 权限边界、兼容旧查询 / 参数、批量上限、复杂 QueryHelper / SQL / DSL 组合，需要在代码旁边写 1 到 3 行短注释说明业务原因或边界。
+- 不给简单字段、getter / setter、直接 DTO 搬运、标准基类委托写噪声注释。
+- 如果本次 CRUD 改动没有新增任何注释，交付说明必须明确它只涉及标准继承、简单字段或直观委托，没有复杂业务和公共契约变化。
+
 ### 低上下文模板仓库下的权限默认规则
 
 如果当前仓库没有可参考的权限命名：
@@ -144,8 +152,19 @@
 - 动态复杂查询
 - 关联查询
 - 批量处理
+- 复杂 SQL、原生 SQL 或 QueryHelper
 - 性能敏感分页
 - CRUD 后强副作用联动
+
+遇到以下情况时，继续读取 `query-dsl-rules.md`：
+
+- `createQuery()` / `QueryParamEntity` DSL 查询
+- `createUpdate()` / `createDelete()` 批量更新或删除
+- 默认排序、多字段排序、分页稳定排序
+- `nest` / `orNest` / `toNestQuery` 嵌套条件
+- `setParam` 合并前端筛选与服务端固定条件
+- AssetsHolder 查询注入前后的 DSL 组织
+- `QueryHelper.transformPageResult` / `combineOneToMany` 多查询结果组合
 
 ## 自检清单
 
@@ -155,4 +174,5 @@
 - 是否避免了重复查询接口和重复样板
 - 权限、路径、文案是否与当前模块一致
 - 是否分析了 AssetsHolder 数据权限：资产类型、权限动作、查询注入、详情访问、更新删除校验、批量操作和关联资产边界
+- 是否为公共类、自定义接口、复杂校验、权限边界、兼容逻辑、批量上限或复杂查询补了必要代码注释
 - 若处于空模板仓库，是否明确区分了“来自现有工作区的事实”和“来自通用规则的默认决策”

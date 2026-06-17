@@ -1,6 +1,6 @@
 ---
 name: jetlinks-web
-description: 在 JetLinks 前端工作区中实现或改造 Vue3 页面，优先复用 `@jetlinks-web-core` 与 `@jetlinks-web` 的组件、hooks、utils。适用于列表页/详情页/弹窗开发、目录落点判断、状态管理、类型与质量约束、Tab 回传、平台上下文、运行时注册扩展、路由菜单装配与查询参数编码等场景。除局部调整白名单外，任何新增页面、页面壳层重构、信息架构或主筛选 / 主列表 / 主详情承载变化，都必须先联合 `jetlinks-web-style` 形成交互方案档案，再进入实现。
+description: 在 JetLinks 前端工作区中实现或改造 Vue3 页面，优先复用 `@jetlinks-web-core` 与 `@jetlinks-web` 的组件、hooks、utils。适用于列表页/详情页/弹窗开发、后端 EnumDict/I18nEnumDict 返回 `{value,text}` 的枚举渲染、目录落点判断、状态管理、类型与质量约束、Tab 回传、平台上下文、运行时注册扩展、路由菜单装配与查询参数编码等场景。除局部调整白名单外，任何新增页面、页面壳层重构、信息架构或主筛选 / 主列表 / 主详情承载变化，都必须先联合 `jetlinks-web-style` 形成交互方案档案，再进入实现。
 ---
 
 # JetLinks Web
@@ -37,8 +37,9 @@ Read [`references/web-development-rules.md`](references/web-development-rules.md
 16. Implement the smallest complete change with Vue 3 SFC + `script setup lang="ts"` after confirming reusable abstractions, extraction boundaries, current workspace exports, and the comment insertion points required by [`references/quality-and-type-rules.md`](references/quality-and-type-rules.md).
 17. After coding, review created or modified Vue/JSX/TSX file responsibilities and line counts. Large files are acceptable only when they still own one coherent responsibility; if a file is large because it mixes unrelated UI, state, requests, transforms, or repeated blocks, extract the appropriate child component, hook, service/api, or util before final output.
 18. Before final output, verify how the current workspace handles frontend i18n for user-visible copy such as 页面标题、区块标题、字段展示名、表格列头、按钮、Tab、空态、Tooltip、校验提示和枚举文案; follow adjacent code instead of scattering hardcoded strings.
-19. Run quality, comment, and type checks with [`references/quality-and-type-rules.md`](references/quality-and-type-rules.md) before final output; if no comment is added, explicitly confirm that the touched frontend files contain no complex business rule, compatibility branch, hidden state linkage, race guard, or public contract that needs one.
-20. Pair with `$jetlinks-conventions` whenever naming/import/i18n consistency or user-visible copy changes are involved, and with `$jetlinks-delivery` when commit or PR output is requested.
+19. When backend fields come from `EnumDict` / `I18nEnumDict` or are shaped as `{ value, text }`, load [`references/enum-rendering-rules.md`](references/enum-rendering-rules.md): render `text` to users, use `value` for submit/filter/status logic, and never display `[object Object]` or duplicate backend enum copy maps.
+20. Run quality, comment, and type checks with [`references/quality-and-type-rules.md`](references/quality-and-type-rules.md) before final output; if no comment is added, explicitly confirm that the touched frontend files contain no complex business rule, compatibility branch, hidden state linkage, race guard, or public contract that needs one.
+21. Pair with `$jetlinks-conventions` whenever naming/import/i18n consistency or user-visible copy changes are involved, and with `$jetlinks-delivery` when commit or PR output is requested.
 
 ## Required Constraints
 
@@ -55,7 +56,8 @@ Read [`references/web-development-rules.md`](references/web-development-rules.md
 - Treat components/hooks/utils listed in references as candidates, not guaranteed facts; verify against current workspace exports before implementation.
 - For pages with generic condition search, prefer `ConditionFilter` as the reusable search shell whenever the workspace already provides `ConditionFilter` plus route encode/decode utilities.
 - For generic condition search fields such as date/time, range, boolean, option/reference, tree, nested path, or valueless conditions, prefer the field-driven generic value editor path provided by `ConditionFilter` field definitions and field-level hooks such as `options`, `loadOptions`, `loadSelectedOptions`, `rename`, `routeAlias`, and `handleParamsItem`; do not jump straight to a custom per-field component unless the generic path is proven insufficient in the current workspace.
-- Only after the page is explicitly classified as a standard management page, and only when adjacent pages clearly still use `ProSearch` or the search is just a lightweight fixed-form filter, may you prioritize `ProSearch`; keep `j-pro-table`, `CardBox`, and `EditDialog` as independent list/edit candidates.
+- Only after the page is explicitly classified as a standard management page, and only when this is a narrow old-page patch, the user explicitly wants the old table style, or the search is a few fixed fields with no route echo / remote options / saved search needs, may you use `ProSearch`; the solution profile or implementation summary must record the exception reason. Adjacent pages using `ProSearch` is evidence to inspect, not a default for new pages.
+- For backend enum fields shaped as `{ value, text }` from `EnumDict` / `I18nEnumDict`, show `text` in tables, cards, details, tags, badges, and filter tokens; use `value` for request params, form models, comparisons, status color, and permissions. Do not render the object directly, do not submit `{ value, text }` unless the API requires it, and do not duplicate backend enum text maps in frontend constants.
 - Business goals come first and references come second; do not let a borrowed layout overrule the actual business task, user role, or decision path.
 - Do not force every frontend requirement into a search-form + table + modal CRUD shell; first decide whether the business is better expressed as workspace, drill-down detail, timeline, dashboard, wizard, kanban, topology, or mixed interaction.
 - Do not default to table plus full edit form; for object details, support summary, sectioned details, local editing, and related records when they fit the business.
@@ -111,10 +113,12 @@ Read [`references/web-development-rules.md`](references/web-development-rules.md
 1. Frontend task type and target module
 2. Business goal, target users, and why this is or is not a standard CRUD page
 3. Selected interaction template, confirmation mode, and which alternatives were rejected
-4. Which references were used, why they are business-relevant, and what was deliberately not borrowed
-5. Current framework style anchors plus reused `jetlinks-web-core` components/hooks/utils/capabilities and key contracts
-6. Any existing component not reused, with checked export/example and reason
-7. If `$frontend-design` was used, which interaction or visual refinements stayed aligned with local style and Ant Design language
-8. Whether a wireframe / effect sketch was provided or why it was unnecessary
-9. Main code changes and compatibility risks
-10. Verification evidence or pending commands, including UI interaction, state flow, route or permission behavior, type checks, created/modified Vue/JSX/TSX file line-count status, reuse scopes checked (same feature, same module, sibling/domain module, shared package, public exports), reused capabilities, and reasons for any new components/hooks/utils/services/API wrappers.
+4. Search-shell decision: `ConditionFilter` by default, or the explicit `ProSearch` exception reason
+5. Enum rendering decision for backend `EnumDict` / `I18nEnumDict` fields when relevant
+6. Which references were used, why they are business-relevant, and what was deliberately not borrowed
+7. Current framework style anchors plus reused `jetlinks-web-core` components/hooks/utils/capabilities and key contracts
+8. Any existing component not reused, with checked export/example and reason
+9. If `$frontend-design` was used, which interaction or visual refinements stayed aligned with local style and Ant Design language
+10. Whether a wireframe / effect sketch was provided or why it was unnecessary
+11. Main code changes and compatibility risks
+12. Verification evidence or pending commands, including UI interaction, state flow, route or permission behavior, type checks, created/modified Vue/JSX/TSX file line-count status, reuse scopes checked (same feature, same module, sibling/domain module, shared package, public exports), reused capabilities, and reasons for any new components/hooks/utils/services/API wrappers.

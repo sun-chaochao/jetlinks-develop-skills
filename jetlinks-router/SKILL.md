@@ -11,7 +11,7 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 
 1. Classify the task.
 2. Decide whether the task must enter a plan-first gate. Use it for complex, cross-module, multi-subtask, or still-changing requirements.
-3. For large backend changes or new backend features, read [`references/backend-design-test-driven-rules.md`](references/backend-design-test-driven-rules.md), write the design draft and test goals into the appropriate docs directory, then wait for explicit user confirmation before implementation.
+3. For large backend changes or new backend features, read [`references/backend-design-test-driven-rules.md`](references/backend-design-test-driven-rules.md) and [`references/document-placement-rules.md`](references/document-placement-rules.md), write the design draft and test goals into the appropriate owning docs location, then wait for explicit user confirmation before implementation.
 4. When plan-first is required but the backend design gate does not apply, output a concise plan that covers goal, scope, non-goals, steps, risks or pending confirmations, and validation, then wait for user confirmation before implementation.
 5. Switch to the most relevant focused JetLinks skill.
 6. Combine multiple focused skills when the task crosses boundaries.
@@ -24,15 +24,15 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 ## Routing
 
 - Protocol package registration, transport codecs, and binary packet handling: [`../jetlinks-protocol/SKILL.md`](../jetlinks-protocol/SKILL.md)
-- Shared coding conventions, imports, and i18n habits: [`../jetlinks-conventions/SKILL.md`](../jetlinks-conventions/SKILL.md)
+- Shared coding conventions, comments, imports, i18n habits, tracing, and MBean observability: [`../jetlinks-conventions/SKILL.md`](../jetlinks-conventions/SKILL.md)
 - Reactive and non-blocking implementation practice: [`../jetlinks-reactive/SKILL.md`](../jetlinks-reactive/SKILL.md)
 - Workspace discovery, module placement, and module creation: [`../jetlinks-routing/SKILL.md`](../jetlinks-routing/SKILL.md)
 - Standard or advanced CRUD work: [`../jetlinks-crud/SKILL.md`](../jetlinks-crud/SKILL.md)
 - AssetsHolder data permission control for CRUD, custom queries, commands, subscriptions, related assets, and aggregate queries: [`../jetlinks-assets-permission/SKILL.md`](../jetlinks-assets-permission/SKILL.md)
 - Direct dependency, command service, or proxy boundaries: [`../jetlinks-boundary/SKILL.md`](../jetlinks-boundary/SKILL.md)
 - Domain events, lifecycle events, and real-time subscriptions: [`../jetlinks-events/SKILL.md`](../jetlinks-events/SKILL.md)
-- Frontend page implementation, capability reuse, and quality constraints in JetLinks Web: [`../jetlinks-web/SKILL.md`](../jetlinks-web/SKILL.md). First analyze the real business workflow instead of defaulting to backend CRUD. Treat references as supporting material from adjacent pages or similar business scenarios, keep Ant Design as the baseline style, avoid meaningless decorative data, and make sure prototype annotations stay out of the final user-facing UI. Except for the `jetlinks-web-style` local-tweak whitelist, route frontend page implementation through `../jetlinks-web-style/SKILL.md` together with `../jetlinks-web/SKILL.md` before coding so a solution profile is locked first.
-- Frontend page style selection and structural reuse: [`../jetlinks-web-style/SKILL.md`](../jetlinks-web-style/SKILL.md). Use it for any frontend page task that creates a page, rewrites a shell, changes first-screen organization, information architecture, main filter/list/detail carrier, visual rhythm, or structural reuse; not only when the user explicitly says “风格”. Also use it when the user wants to follow an existing page style, when a page could reasonably be built in several different shells, or when style choice should be confirmed before implementation.
+- Frontend page implementation, capability reuse, and quality constraints in JetLinks Web: [`../jetlinks-web/SKILL.md`](../jetlinks-web/SKILL.md). First analyze the real business workflow instead of defaulting to backend CRUD. Treat references as supporting material from adjacent pages or similar business scenarios, keep Ant Design as the baseline style, avoid meaningless decorative data, and make sure prototype annotations stay out of the final user-facing UI. Backend `EnumDict` / `I18nEnumDict` fields usually render as `{ value, text }`: display `text`, submit/filter by `value`. Except for the `jetlinks-web-style` local-tweak whitelist, route frontend page implementation through `../jetlinks-web-style/SKILL.md` together with `../jetlinks-web/SKILL.md` before coding so a solution profile is locked first.
+- Frontend page style selection and structural reuse: [`../jetlinks-web-style/SKILL.md`](../jetlinks-web-style/SKILL.md). Use it for any frontend page task that creates a page, rewrites a shell, changes first-screen organization, information architecture, main filter/list/detail carrier, visual rhythm, or structural reuse; not only when the user explicitly says “风格”. Also use it when the user wants to follow an existing page style, when a page could reasonably be built in several different shells, or when style choice should be confirmed before implementation. Standard table pages are not the fallback for missing facts, and `ProSearch` needs an explicit old-page / lightweight-filter exception reason.
 - Knowledge capture and reusable summary output: [`../jetlinks-capture/SKILL.md`](../jetlinks-capture/SKILL.md)
 - Branch strategy, commit titles, tests, and PR text: [`../jetlinks-delivery/SKILL.md`](../jetlinks-delivery/SKILL.md)
 
@@ -44,7 +44,15 @@ Read [`ai-prompt.md`](references/ai-prompt.md) first. Treat it as the routing in
 - When local examples are missing, clearly separate defaults from verified workspace facts.
 - Do not directly implement complex or unstable requirements before clarifying scope, exclusions, risks, and validation with the user.
 - Do not implement large backend changes or new backend features before a design draft and test goals have been written to the appropriate docs directory and explicitly confirmed by the user.
+- Do not place task logs, test reports, PR descriptions, or temporary design notes into README files; README is for durable repository or module overview.
 - Do not treat tests as a checkbox: test goals must map to realistic business scenarios and data, and failures must drive root-cause analysis rather than weaker assertions.
+- For code changes, apply the comment gate from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md) before implementation: identify required comment targets, add comments in the touched code when complex business intent / permission boundary / compatibility / lifecycle / public contract exists, and only report "no comments needed" when the touched code is straightforward. A final summary or PR description does not replace code comments.
+- For complex SQL, native SQL, aggregation, joins, deep pagination, or batch writes, prefer standard SQL and existing QueryHelper / DSL abstractions. Only accept database-specific dialect SQL when the user explicitly requires that database or the module is already database-specific; document dialect risk and require pressure testing or equivalent performance evidence.
+- For critical backend business flows, state the TraceHolder tracing decision in the design or implementation summary: manual spans added, existing platform tracing coverage, or not applicable. Route detailed rules to [`../jetlinks-conventions/references/tracing.md`](../jetlinks-conventions/references/tracing.md).
+- For long-lived in-memory tasks, caches, queues, buffers, retry pools, and session / connection / subscription managers, state the MBean observability decision in the design or implementation summary: MBean added, existing MBean / monitor covered, or not applicable. Route detailed rules to [`../jetlinks-conventions/references/mbean-observability.md`](../jetlinks-conventions/references/mbean-observability.md).
+- Treat compatibility as a general release-boundary decision, not a CRUD-only concern. For any API, DTO, Command, Event, Topic, protocol payload, config, persisted data, frontend route parameter, QueryParam, or `termType`, collapse unreleased same-PR intermediate forms into the final best-practice design; only keep compatibility or migration for released, persisted, or externally depended-on behavior.
+- Before adding compatibility code, identify the concrete compatibility target. If the only target is an earlier commit, draft, test expectation, or caller inside the same unreleased PR, do not add fallback branches, deprecated aliases, dual DTO parsing, transitional flags, migration code, or old-behavior tests; update all in-PR callers, tests, and docs to the final canonical behavior instead.
+- If release or external dependency status is unknown, ask the user one direct question about whether the old behavior has been released, persisted, or externally depended on; do not invent compatibility "just in case".
 - When the framework, SDK, third-party library, or existing API does not directly satisfy the requirement (inaccessible method, serialization error, reactive/blocking mismatch, type/generic clash, exception model gap, third-party behavior mismatch), route through `$jetlinks-conventions` and resolve the root cause via official extension points, adjacent module abstractions, dependency choice, or by informing the user with concrete trade-offs; never ship reflection / `Unsafe` / visibility bypass / copied source / monkey patches / bytecode injection / silent exception swallowing as a hidden workaround. See [`../jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../jetlinks-conventions/references/root-cause-and-no-hack-rules.md).
 - When Apache Commons utilities are already present or adjacent code already uses them, prefer them for common null or empty checks instead of handwritten repetitive branches.
 - Keep changes scoped to the requested capability; avoid unrelated refactors or speculative cleanup.
@@ -61,7 +69,12 @@ When analyzing first:
 4. Focused JetLinks skill or skills to use
 5. Workspace facts to confirm
 6. Proposed code and document locations
-7. Plan summary, test goals, or direct-execution rationale
+7. Release-boundary decision when compatibility is in question
+8. Comment decision when complex or non-obvious code is involved
+9. Database portability and performance test decision when SQL is involved
+10. TraceHolder tracing decision when critical backend flows are involved
+11. MBean observability decision when long-lived in-memory or cache behavior is involved
+12. Plan summary, test goals, or direct-execution rationale
 
 When implementing:
 

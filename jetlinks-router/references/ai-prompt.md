@@ -19,9 +19,12 @@
 
 3. 后端大改先设计与测试目标，再开发
     - 对较大的后端改动或新功能，必须遵循 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md)。
-    - 先把设计稿、任务拆分和测试目标写入当前工作区对应文档目录，再等待用户明确确认。
+    - 文档落点遵循 [`document-placement-rules.md`](document-placement-rules.md)：README 只放长期总览，测试报告、任务流水和 PR 证据不放 README。
+    - 先把设计稿、任务拆分和测试目标写入当前工作区对应归属文档，再等待用户明确确认。
     - 用户确认后，先按真实使用场景和数据制定测试目标，再实现代码，直到测试目标达成。
     - 不允许为了让测试通过而删除测试、弱化断言、只跑无关测试、改低业务期望或绕过真实校验。
+    - 兼容性是通用发布边界判断，不只限于 CRUD：API / DTO / Event / Topic / Command / 协议 / 配置 / 前端路由 / QueryParam / termType 等同一 PR 内未发布中间形态优先收敛到最佳实践；已合入、已发布、已有持久化数据或外部依赖时才设计兼容 / 迁移。
+    - 添加兼容代码前必须说明兼容对象；拿不准是否已发布或外部依赖时，只问一个具体确认问题，不为了保险保留旧分支。
 
 4. 只切换必要 skill
     - 本文件只做路由。
@@ -56,6 +59,7 @@
 10. 任务结束时可以判断是否值得沉淀知识
     - 只有产出了稳定、可复用、非显然的知识时，才建议写总结或沉淀文档。
     - 沉淀形式优先选择 worklog、knowledge、playbook，再考虑 prompt 或 skill 更新。
+    - 不为每次任务默认新增文档；先更新已有归属文档，或把一次性测试证据留在 PR / CI。
     - 如果判断值得沉淀，不要直接结束任务；应先提示用户是否需要生成正式文档。
     - 如果结论已经成熟到可抽成通用 JetLinks skill，还应额外询问是否并入 `jetlinks-develop-skills` 并准备官方 PR。
 
@@ -70,14 +74,24 @@
 
 13. 根因优先，禁用奇技淫巧：统一以 [`jetlinks-conventions/references/root-cause-and-no-hack-rules.md`](../../jetlinks-conventions/references/root-cause-and-no-hack-rules.md) 为准；router 不重复列举禁止清单。
 
+14. 注释要平衡人类可读性和模型上下文
+   - 复杂业务规则、兼容逻辑、并发 / 生命周期保护、安全边界、TraceHolder / MBean 决策等，需要结合 [`jetlinks-conventions/references/code-comments.md`](../../jetlinks-conventions/references/code-comments.md) 写短注释。
+   - 类注释和 SPI 接口方法注释必须完整，写清职责、调用时机、参数、返回、错误、副作用和实现约束；必要时补真实 `@since` 和指向订阅相关类型 / 参考实现的 `@see`。
+   - 简单赋值、DTO 搬运、直观方法调用不写噪声注释；优先用好命名和小方法，注释只解释原因和边界。
+   - 注释要求必须落到代码里；最终回复、设计稿或 PR 说明不能替代代码旁边的类注释、方法注释或关键分支短注释。
+
+15. 常驻能力要考虑运维可观测性
+   - 涉及常驻内存任务、缓存、队列、buffer、重试池、会话 / 连接 / 订阅管理器或后台执行器时，必须结合 [`jetlinks-conventions/references/mbean-observability.md`](../../jetlinks-conventions/references/mbean-observability.md) 判断是否需要 MBean。
+   - 目标是辅助运维快速定位问题：看统计、看状态、看最近错误，并在安全边界内刷新缓存、flush、compact 或手动重试。
+
 ## 标准工作流
 
 1. 分类任务
-    - 判断这是结构发现、模块创建、CRUD、复杂查询、跨服务调用、实时订阅、事件驱动、国际化、前端页面改造还是导入/注解确认。
+    - 判断这是结构发现、模块创建、CRUD、复杂查询、跨服务调用、实时订阅、事件驱动、国际化、前端页面改造、代码注释、MBean 运维可观测性还是导入/注解确认。
 
 2. 判断是否进入 `plan-first`
     - 如果任务复杂、跨模块、需求仍在变化、涉及多个子任务，或存在多个方案 / 明显风险，先输出计划并等待用户确认。
-    - 如果是较大的后端改动或新功能，先读取 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md)，把设计稿和测试目标落到对应文档目录，等待用户确认后才能实现。
+    - 如果是较大的后端改动或新功能，先读取 [`backend-design-test-driven-rules.md`](backend-design-test-driven-rules.md) 和 [`document-placement-rules.md`](document-placement-rules.md)，把设计稿和测试目标落到对应归属文档，等待用户确认后才能实现。
 
 3. 扫描当前工作区
     - 查看根目录、父 `pom.xml`、聚合模块、相邻模块、资源目录和已有实现。
@@ -153,6 +167,8 @@
 适用：
 - 不确定 `javax`/`jakarta`
 - 不确定实体、控制器、事件、命令、订阅的注解和导入
+- 需要判断复杂代码是否应该补注释，以及类注释 / SPI 方法注释是否完整，SPI 是否需要 `@since` / `@see`
+- 需要为常驻任务、缓存、队列或重试池判断 MBean 运维可观测性边界
 
 ### 创建新模块或聚合模块
 
@@ -164,6 +180,11 @@
 - 调整聚合 `pom.xml`、自动配置、资源目录
 - 空脚手架中首次创建业务模块
 
+边界：
+- 如果存在 `manager` / `core` 分层，CRUD、Controller、应用 Service、持久化 Entity / Repository、权限校验、i18n 和运行时装配归 `manager`。
+- `core` 只承载公共 domain、DTO、命令 / 事件定义、常量、SPI / 扩展接口等跨模块契约。
+- 不因“需要 CRUD”“存在 DTO”“以后可能复用”把 CRUD 放进 `core`，也不默认创建 `xxx-api`。
+
 ### 标准 CRUD
 
 切换：
@@ -174,7 +195,7 @@
 - 标准增删改查
 - 权限、校验、基础 i18n
 - AssetsHolder 数据权限可见范围、详情访问、更新删除校验、批量操作和导出边界判断
-- 空脚手架中首次创建基础 CRUD 骨架
+- 空脚手架中首次创建基础 CRUD 骨架；若存在 `manager` / `core` 分层，CRUD 骨架落到 `manager`，公共 DTO / 命令契约才落到 `core`
 
 ### 复杂 CRUD / 查询 / 批处理
 
@@ -254,7 +275,8 @@
 - 需要先分析业务目标，再决定交互方案，而不是默认 CRUD 表格页
 - 多方案时让用户选择业务交互方案；组件落地仍以 `jetlinks-web-core` 真实导出、组件实现和相邻页面用法为准
 - `jetlinks-project-ui-cli` 只在用户明确要求时作为外部参考，不是默认依赖或导入来源
-- 需要前端 i18n、ConditionFilter 优先级、轻量字段编辑、无意义数据规避或原型标注清理等细则时，直接遵循 `$jetlinks-web`
+- 需要前端 i18n、后端 `EnumDict` / `I18nEnumDict` 的 `{ value, text }` 渲染、ConditionFilter 优先级、轻量字段编辑、无意义数据规避或原型标注清理等细则时，直接遵循 `$jetlinks-web`
+- 标准管理表格页不是信息不足时的兜底；`ProSearch` 必须有窄改旧页、用户明确要求旧表格风格或轻量固定筛选的例外理由
 
 ### 知识沉淀与经验归档
 
@@ -304,6 +326,11 @@
 - CRUD 后要同步其他数据
     - `$jetlinks-crud`
     - `$jetlinks-events`
+    - 如涉及响应式链路，再加 `$jetlinks-reactive`
+
+- 常驻缓存、重试队列或后台任务
+    - `$jetlinks-conventions`
+    - 如涉及事件 / 订阅消费，再加 `$jetlinks-events`
     - 如涉及响应式链路，再加 `$jetlinks-reactive`
 
 - 处理设备或系统消息流

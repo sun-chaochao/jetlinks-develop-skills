@@ -28,10 +28,11 @@
 10. 若以下五项中任一关键事实未知：目标用户、进入页面后的第一任务、成功标准、操作对象是一条还是一批、关键指标/图表的数据来源，则先向用户提问；若其中两项及以上未知，或页面结构在多种分型间仍摇摆，必须先澄清再实现。
 11. 交互方案档案默认强制：除非任务命中 `../../jetlinks-web-style/references/style-selection-rules.md` 中定义的"局部调整白名单"（仅改一个表单字段 / 仅改一个筛选条件 / 仅改一个弹窗内容 / 仅样式与文案与组件 props 微调），任何新增页面、重构页面壳层、调整信息架构或调整主筛选 / 主列表 / 主详情承载方式都必须先联合 `jetlinks-web-style` 建立方案档案再实现：读 [`../../jetlinks-web-style/references/style-catalog.md`](../../jetlinks-web-style/references/style-catalog.md)（索引）+ [`style-catalog-routing.md`](../../jetlinks-web-style/references/style-catalog-routing.md) + 仅 [`style-catalog-templates.md`](../../jetlinks-web-style/references/style-catalog-templates.md) 中推荐方案和替代方案对应的 `###` 小节（禁止整篇 templates）、以及 [`style-catalog-core-base.md`](../../jetlinks-web-style/references/style-catalog-core-base.md)（§1–§6）+ 按需 [`style-catalog-core-detail-shell.md`](../../jetlinks-web-style/references/style-catalog-core-detail-shell.md)（详情 / 侧栏相关）、入口见 [`style-catalog-core.md`](../../jetlinks-web-style/references/style-catalog-core.md)，不允许默认回退到传统 CRUD 页面。若已知事实清楚且只有一个可信推荐方案，可以记录"默认采用推荐方案"并继续；若页面骨架或信息架构风险较高，或 2 个以上方案同样合理，先给出线框图 / 方案选项并等待确认再实现。
 12. 先确认当前模块前端 i18n 的真实接入方式：页面标题、字段展示名、表格列名、按钮文案、状态文案、空态提示、校验消息和枚举文本从哪里取值，默认值如何表达；优先沿用相邻实现，不在页面代码中散落硬编码文案。
-13. 如页面存在通用搜索或筛选层，先确认当前 workspace 是否已提供 `ConditionFilter` 及其编码、回显工具；若已提供，默认优先用它承接搜索层，不因已选页面风格或管理页壳层而直接回退 `ProSearch`。
-14. 方案选定后，按卡片、列表、筛选、详情、轻量编辑、完整编辑、图标、抽屉、底部操作、资源选择等场景映射 `jetlinks-web-core` 组件，再决定是否需要新增局部实现。
-15. 使用最小完整改动完成需求，优先沿用现有页面组合和模块边界。
-16. 按质量与类型约束做交付前自检，补充可验证路径。
+13. 先确认后端枚举字段契约：`EnumDict` / `I18nEnumDict` 通常返回 `{ value, text }`。用户可见处显示 `text`，提交 / 筛选 / 比较 / 状态色使用 `value`；详细规则见 [`enum-rendering-rules.md`](enum-rendering-rules.md)。
+14. 如页面存在通用搜索或筛选层，先确认当前 workspace 是否已提供 `ConditionFilter` 及其编码、回显工具；若已提供，默认优先用它承接搜索层，不因已选页面风格或管理页壳层而直接回退 `ProSearch`。使用 `ProSearch` 必须在方案档案或实现说明中写明例外理由。
+15. 方案选定后，按卡片、列表、筛选、详情、轻量编辑、完整编辑、图标、抽屉、底部操作、资源选择等场景映射 `jetlinks-web-core` 组件，再决定是否需要新增局部实现。
+16. 使用最小完整改动完成需求，优先沿用现有页面组合和模块边界。
+17. 按质量与类型约束做交付前自检，补充可验证路径。
 
 ## 业务优先，参考为辅
 
@@ -99,6 +100,15 @@
 - 如果相邻模块尚未形成清晰的前端 i18n 约定，先按当前模块事实复用最接近的实现，并在需要时结合 `$jetlinks-conventions` 判断落点，不要临时自造另一套国际化封装。
 - “字段名不要写死”指的是字段展示名、列名、标题、按钮和提示文案不要散落硬编码；接口字段 key、路由参数 key、查询参数名等技术契约仍以真实接口和相邻实现为准。
 
+## 后端枚举渲染
+
+- 后端字段来自 `EnumDict` / `I18nEnumDict` 时，默认按 `{ value, text }` 处理。
+- 表格、卡片、详情、Tag、Badge、Tooltip 和筛选 Token 显示 `text`，不要直接渲染整个对象。
+- 表单 model、查询参数、路由参数、状态颜色、图标、排序、权限判断使用 `value`。
+- 后端已经返回 `text` 时，前端不再重复维护枚举文案映射；如需颜色 / 图标，只按 `value` 建稳定映射。
+- 同一字段可能返回字符串或对象时，集中 normalize，不在模板里到处写三元表达式。
+- 条件筛选中的枚举字段优先走 `ConditionFilter` 的通用选项能力，支持 `loadOptions` 和 `loadSelectedOptions`，确保 URL 只存 `value` 也能回显 `text`。
+
 ## 与 `$frontend-design` 协同
 
 - 仅当任务包含页面美化、交互优化、层级梳理、状态页完善或体验打磨时，再考虑结合 `$frontend-design`。
@@ -108,7 +118,9 @@
 - 页面交互方案选择只决定业务结构、信息层级和操作路径，不直接决定搜索组件；搜索层仍应单独判断是否优先使用 `ConditionFilter`。
 - 页面交互方案选择不替代组件核验；选定方案后仍必须回到当前 workspace 的 `jetlinks-web-core` 组件、hooks 和 utils。
 - 先确认页面是否真的适合 CRUD 范式；只有当页面已被明确判断为标准管理页时，才进入管理页组合判断。
-- 对标准管理页，若 workspace 已提供 `ConditionFilter` 与路由编码/回显工具，默认优先采用 `ConditionFilter` + `j-pro-table`；仅在相邻页面稳定沿用 `ProSearch`，或搜索只是轻量固定表单筛选时，才回退到 `ProSearch`。
+- 对标准管理页，若 workspace 已提供 `ConditionFilter` 与路由编码/回显工具，默认优先采用 `ConditionFilter` + `j-pro-table`；只有窄改旧页、用户明确要求旧表格风格，或搜索只是轻量固定表单筛选且无路由回显 / 远程枚举或引用选项 / 保存搜索需求时，才回退到 `ProSearch`。
+- 使用 `ProSearch` 的例外必须具体：窄改旧页、用户明确要求旧表格风格、或筛选只有少量固定字段且无路由回显、远程枚举/引用选项、保存搜索、快捷筛选联动需求。相邻页面仍在用 `ProSearch` 只能作为兼容证据，不能让新页面默认沿用原始表格风格。
+- 标准管理表格页不是“信息不足时的默认方案”。如果第一任务不是批量检索和轻量增删改查，或对象状态识别、持续筛选、处置流、单对象理解更重要，应优先走资产卡片台账、筛选工作台、对象详情工作区、处置工作台等方案。
 - 如果核心价值在监控、分析、流程推进、异常处置或对象关系理解，优先考虑工作台、主从详情、分步流、时间线、卡片区块、图形化概览等更贴近业务的结构。
 - 可以参考相似业务的设计，但必须先说明“为什么这个参考与当前业务相似”；只借鉴有业务对应关系的分区、交互和状态呈现，不照搬完全不同场景的交互动线。
 - 优先优化信息层级、区块节奏、反馈状态、空/错/载态、微交互和可读性；不要平地起楼式替换成熟页面组合。
@@ -130,6 +142,7 @@
 - 状态边界与 store 使用：[`state-management-rules.md`](state-management-rules.md)
 - 样式变量、字号、间距节奏和局部尺寸约束：结合 `../../jetlinks-web-style/SKILL.md`，以 `jetlinks-web-core/src/style.css` 与 `../../jetlinks-web-style/references/style-rules.md` 为准。
 - 质量与类型约束：[`quality-and-type-rules.md`](quality-and-type-rules.md)
+- 后端枚举渲染：[`enum-rendering-rules.md`](enum-rendering-rules.md)
 - 示例查找入口：[`example-locations.md`](example-locations.md)
 - 快速导航总览：[`index.md`](index.md)
 
@@ -147,7 +160,9 @@
 - 不要因为实现方便就把业务页面压缩成老套的“筛选 + 表格 + 弹窗”后台 CRUD 套壳，除非当前业务和相邻实现都明确证明这就是最合适的结构。
 - 不要默认表格 + 全量编辑表单；对象详情应优先考虑摘要、分区、局部编辑和关联记录。
 - 不要在页面壳层或风格仍未收敛时，跳过 `jetlinks-web-style` 方案档案直接默认传统 CRUD 管理页。
-- 不要在 workspace 已提供 `ConditionFilter` 及配套编码/回显工具时，仍默认回退到 `ProSearch` 作为通用搜索壳，除非相邻页面已稳定沿用旧实现或当前筛选确实只是轻量固定表单。
+- 不要在 workspace 已提供 `ConditionFilter` 及配套编码/回显工具时，仍默认回退到 `ProSearch` 作为通用搜索壳；只有窄改旧页、用户明确要求旧表格风格，或当前筛选确实只是轻量固定表单且没有路由回显 / 远程枚举或引用选项 / 保存搜索需求时才可例外。
+- 不要在没有写明例外理由时使用 `ProSearch`；新页面默认先走方案档案 + `ConditionFilter`，不要靠 `ProSearch` 原始表格风格完成页面生成。
+- 不要把后端 `EnumDict` / `I18nEnumDict` 返回的 `{ value, text }` 直接渲染成对象，也不要为了显示文案在前端重复维护一份枚举文本映射。
 - 不要把完全不同业务场景中的交互路径、快捷操作、状态组织或统计模块直接搬过来。
 - 不要添加无来源、无决策价值、无后续动作承接的数据展示，只为了填满页面。
 - 不要在未确认真实数据源、刷新机制和业务用途前实现统计卡、图表、趋势或排行榜。

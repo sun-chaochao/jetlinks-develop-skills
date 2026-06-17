@@ -13,7 +13,8 @@ Read [`references/assets-holder-rules.md`](references/assets-holder-rules.md) fi
 2. Inspect adjacent code for `AssetType` enums, `@AssetsController`, `AssetsHolderCrudController`, `CorrelatesAssetsHolderCrudController`, `CrudAssetPermission`, `AssetsHolder.injectQueryParam`, `AssetsHolder.assertPermission`, command handlers, and local tests.
 3. If this is part of a large backend feature, pair with [`../jetlinks-router/references/backend-design-test-driven-rules.md`](../jetlinks-router/references/backend-design-test-driven-rules.md): document the asset type, permission boundary, test goals, and user confirmation before implementation.
 4. Choose the unified AssetsHolder integration pattern that matches the local codebase; do not create ad hoc tenant, user, department, organization, or creator filters.
-5. Pair with `$jetlinks-crud`, `$jetlinks-boundary`, `$jetlinks-events`, or `$jetlinks-reactive` when the asset permission decision belongs to those flows.
+5. Before implementing asset permission code, identify comment targets from [`../jetlinks-conventions/references/code-comments.md`](../jetlinks-conventions/references/code-comments.md): asset ownership, correlated asset mapping, `ignore = true` equivalent checks, admin / platform exceptions, batch mixed-permission behavior, custom query injection, command or subscription permission propagation.
+6. Pair with `$jetlinks-crud`, `$jetlinks-boundary`, `$jetlinks-events`, or `$jetlinks-reactive` when the asset permission decision belongs to those flows.
 
 ## Required Constraints
 
@@ -25,6 +26,7 @@ Read [`references/assets-holder-rules.md`](references/assets-holder-rules.md) fi
 - For related assets, verify whether the permission should apply to the entity itself or a referenced asset, then use the correlated-controller or query-injection pattern.
 - If asset ownership, related asset mapping, permission action, or admin / tenant / platform exception semantics are unclear, ask the user before implementation.
 - Tests must verify allowed and denied asset scopes with realistic IDs, bindings, and permissions; do not bypass the core holder behavior with mocks that make the permission check meaningless.
+- Do not leave custom asset permission code comment-free when it encodes non-obvious ownership, correlated asset mapping, `@AssetsController(ignore = true)` replacement checks, admin / platform exceptions, batch mixed-permission behavior, custom query injection, or permission propagation through commands / subscriptions. Add concise comments next to those boundaries.
 
 ## Response Shape
 
@@ -33,4 +35,5 @@ Read [`references/assets-holder-rules.md`](references/assets-holder-rules.md) fi
 3. Asset type and permission action
 4. Recommended integration pattern
 5. Unclear ownership or scope questions, if any
-6. Verification evidence or exact pending commands
+6. Comment targets added, or the concrete reason no code comments were needed
+7. Verification evidence or exact pending commands
